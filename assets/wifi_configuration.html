@@ -7,91 +7,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <style type="text/css">
         /* ============================================================
-		   2025 UI – GLASS + NEUMORPHIC + RESPONSIVE PHONE / DESKTOP
+		   2025.2 / iOS 26 CONCEPT UI
+		   GLASS + SOFT NEUMORPHIC + RESPONSIVE PHONE/DESKTOP
 		   ------------------------------------------------------------
+		   Compatibility:
+		   - Keep existing class/id: container, tabs, tab, tab-content,
+			 language-switch, theme-toggle-btn, ghost-btn,
+			 ap_list, saved_list, feature-chips, toast, loading-overlay...
 		   - data-theme="light" | "dark"
 		   - data-device="auto" | "mobile" | "desktop"
 		   ============================================================ */
 
-		/* ------------------ BIẾN CHUNG (CSS VARIABLES) ------------------ */
+
+		/* ============================================================
+		   DESIGN TOKENS (iOS 26-like)
+		   ============================================================ */
 		:root {
-			/* màu cơ bản */
-			--bg-body-light: linear-gradient(140deg, #dde7f6, #ecf1fb, #f9fbff);
-			--bg-body-dark: radial-gradient(circle at top, #020617, #020617 40%, #020617 100%);
+			/* Background */
+			--bg-body-light: radial-gradient(circle at 20% 0%, #f7fbff 0%, #eef4ff 35%, #f6f8ff 70%, #ffffff 100%);
+			--bg-body-dark: radial-gradient(circle at 15% -10%, #0b1220 0%, #0b1220 25%, #020617 60%, #020617 100%);
 
+			/* Accent system */
 			--accent: #3b82f6;
-			--accent-soft: rgba(59, 130, 246, 0.15);
-			--accent-strong: #2563eb;
+			--accent-strong: #1d4ed8;
+			--accent-soft: rgba(59, 130, 246, 0.14);
+			--accent-glow: rgba(59, 130, 246, 0.35);
 
-			--text-main: #111827;
-			--text-muted: #6b7280;
-			--text-soft: #9ca3af;
+			/* Text */
+			--text-main: #0f172a;
+			--text-muted: #64748b;
+			--text-soft: #94a3b8;
 
+			/* Radii */
+			--radius-xl: 30px;
 			--radius-lg: 24px;
 			--radius-md: 14px;
+			--radius-sm: 10px;
 			--radius-pill: 999px;
 
-			--shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08);
-			--shadow-soft-strong: 0 16px 40px rgba(15, 23, 42, 0.16);
+			/* Glass layers */
+			--glass-1: rgba(255, 255, 255, 0.70);
+			--glass-2: rgba(255, 255, 255, 0.45);
+			--glass-3: rgba(255, 255, 255, 0.28);
+			--glass-border: rgba(255, 255, 255, 0.55);
+
+			--glass-dark-1: rgba(2, 6, 23, 0.78);
+			--glass-dark-2: rgba(2, 6, 23, 0.55);
+			--glass-dark-3: rgba(2, 6, 23, 0.38);
+			--glass-dark-border: rgba(148, 163, 184, 0.22);
+
+			/* Blur */
+			--blur-strong: blur(26px) saturate(180%);
+			--blur-medium: blur(18px) saturate(160%);
+			--blur-soft: blur(12px) saturate(140%);
+
+			/* Shadows (soft + floating) */
+			--shadow-soft: 0 10px 26px rgba(2, 6, 23, 0.08);
+			--shadow-soft-strong: 0 18px 48px rgba(2, 6, 23, 0.18);
+			--shadow-float: 0 22px 50px rgba(2, 6, 23, 0.12);
+			--shadow-float-tight: 0 10px 22px rgba(2, 6, 23, 0.10);
+
+			/* Neumorphic inset */
 			--shadow-inset-soft:
-				3px 3px 8px rgba(15, 23, 42, 0.08),
-				-3px -3px 8px rgba(255, 255, 255, 0.8);
+				inset 2px 2px 6px rgba(2, 6, 23, 0.06),
+				inset -2px -2px 8px rgba(255, 255, 255, 0.70);
 
-			--input-bg-light: #f3f4f6;
-			--input-bg-dark: #020617;
+			/* Inputs */
+			--input-bg-light: rgba(255, 255, 255, 0.55);
+			--input-bg-dark: rgba(2, 6, 23, 0.55);
 
+			/* Focus ring */
+			--focus-ring: 0 0 0 2px rgba(59, 130, 246, 0.18), 0 0 0 6px rgba(59, 130, 246, 0.08);
+
+			/* Layout */
 			--max-width-desktop: 960px;
 			--page-padding-top: 64px;
 			--page-padding-top-mobile: 76px;
 
-			--transition-fast: 0.16s ease-out;
-			--transition-normal: 0.25s ease;
+			/* Motion */
+			--transition-fast: 0.14s cubic-bezier(.2,.8,.2,1);
+			--transition-normal: 0.24s cubic-bezier(.2,.8,.2,1);
+			--transition-slow: 0.38s cubic-bezier(.2,.8,.2,1);
 		}
 
+		/* Support reduce motion */
+		@media (prefers-reduced-motion: reduce) {
+			*,
+			*::before,
+			*::after {
+				animation-duration: 0.01ms !important;
+				animation-iteration-count: 1 !important;
+				transition-duration: 0.01ms !important;
+				scroll-behavior: auto !important;
+			}
+		}
+
+
 		/* ============================================================
-		   BODY – NỀN, TYPO, MẶC ĐỊNH
+		   BODY – BASE
 		   ============================================================ */
 		body {
 			margin: 0;
 			padding: 0;
-			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Arial, sans-serif;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", Arial, sans-serif;
 			background: var(--bg-body-light);
 			color: var(--text-main);
 			-webkit-font-smoothing: antialiased;
 			-webkit-tap-highlight-color: transparent;
 			padding-top: var(--page-padding-top);
+			min-height: 100dvh;
+		}
+
+		/* Subtle background grains (optional lightweight effect) */
+		body::before {
+			content: "";
+			position: fixed;
+			inset: 0;
+			background:
+				radial-gradient(circle at 10% 10%, rgba(59,130,246,0.06), transparent 30%),
+				radial-gradient(circle at 90% 20%, rgba(16,185,129,0.05), transparent 35%),
+				radial-gradient(circle at 20% 90%, rgba(139,92,246,0.05), transparent 35%);
+			pointer-events: none;
+			z-index: -1;
 		}
 
 		/* Dark theme */
 		body[data-theme="dark"] {
 			background: var(--bg-body-dark);
 			color: #e5e7eb;
+			color-scheme: dark;
 		}
+
+		body[data-theme="dark"]::before {
+			background:
+				radial-gradient(circle at 12% 8%, rgba(59,130,246,0.10), transparent 32%),
+				radial-gradient(circle at 88% 18%, rgba(16,185,129,0.08), transparent 36%),
+				radial-gradient(circle at 16% 92%, rgba(139,92,246,0.09), transparent 36%);
+		}
+
 
 		/* ============================================================
-		   CHẾ ĐỘ GIAO DIỆN PHONE / DESKTOP
-		   ------------------------------------------------------------
-		   data-device="auto"    → responsive bình thường
-		   data-device="mobile"  → ép layout nhỏ, bo sát, font to
-		   data-device="desktop" → ép layout rộng như PC
+		   DEVICE MODES
 		   ============================================================ */
+		/* Auto (default) uses media queries */
 
-		/* Auto (mặc định) = chỉ dùng @media, không cần CSS riêng */
-		body:not([data-device]) {
-			/* tương đương auto */
-		}
-
-		/* Ép chế độ MOBILE */
+		/* Force MOBILE */
 		body[data-device="mobile"] {
 			padding-top: var(--page-padding-top-mobile);
 		}
 
+		/* Force MOBILE sizing */
 		body[data-device="mobile"] .container {
 			max-width: 460px;
 			width: 100%;
 			margin: 0 auto 18px;
-			padding: 18px 16px 20px;
-			border-radius: 20px;
+			padding: 20px 16px 22px;
+			border-radius: 22px;
 		}
 
 		body[data-device="mobile"] .tabs {
@@ -102,21 +173,21 @@
 		}
 
 		body[data-device="mobile"] .tab {
-			font-size: 13px;
-			padding: 8px 14px;
+			font-size: 12.5px;
+			padding: 8px 12px;
 		}
 
 		body[data-device="mobile"] input,
 		body[data-device="mobile"] select {
 			font-size: 15px;
-			padding: 12px;
+			padding: 12px 12px;
 		}
 
 		body[data-device="mobile"] label {
 			font-size: 14px;
 		}
 
-		/* Ép chế độ DESKTOP */
+		/* Force DESKTOP */
 		body[data-device="desktop"] {
 			padding-top: var(--page-padding-top);
 		}
@@ -130,8 +201,9 @@
 			margin-right: auto;
 		}
 
+
 		/* ============================================================
-		   MOBILE RESPONSIVE TỰ ĐỘNG (data-device="auto" hoặc không đặt)
+		   AUTO RESPONSIVE
 		   ============================================================ */
 		@media (max-width: 600px) {
 			body:not([data-device]),
@@ -143,88 +215,136 @@
 			body[data-device="auto"] .container {
 				max-width: 460px;
 				margin: 0 10px 16px;
-				padding: 18px 16px 20px;
-				border-radius: 20px;
+				padding: 20px 16px 22px;
+				border-radius: 22px;
 			}
 
 			body:not([data-device]) .tab,
 			body[data-device="auto"] .tab {
-				padding: 8px 14px;
-				font-size: 13px;
+				padding: 8px 12px;
+				font-size: 12.5px;
 			}
 		}
 
+
 		/* ============================================================
-		   HEADER TRONG MỖI TAB
+		   INNER TAB HEADER
 		   ============================================================ */
 		.tab-inner-header {
 			display: flex;
 			flex-direction: column;
-			gap: 4px;
+			gap: 6px;
 			margin-bottom: 18px;
 		}
 
 		.tab-title {
-			font-size: clamp(18px, 2.1vw, 22px);
-			font-weight: 700;
-			letter-spacing: 0.02em;
+			font-size: clamp(19px, 2.2vw, 23px);
+			font-weight: 750;
+			letter-spacing: 0.015em;
 		}
 
 		.tab-subtitle {
-			font-size: 13px;
+			font-size: 12.8px;
 			color: var(--text-muted);
+			line-height: 1.45;
 		}
 
+
 		/* ============================================================
-		   MAIN CONTAINER – GLASS CARD
+		   CONTAINER – iOS 26 GLASS CARD
 		   ============================================================ */
 		.container {
 			max-width: var(--max-width-desktop);
 			margin: 0 auto 24px;
-			padding: 24px 24px 22px;
-			background: rgba(255, 255, 255, 0.86);
-			backdrop-filter: blur(18px) saturate(180%);
-			border-radius: var(--radius-lg);
+			padding: 28px 26px 24px;
+
+			background:
+				linear-gradient(135deg, var(--glass-1), var(--glass-2) 45%, var(--glass-3));
+			backdrop-filter: var(--blur-strong);
+			-webkit-backdrop-filter: var(--blur-strong);
+
+			border-radius: var(--radius-xl);
+			border: 1px solid var(--glass-border);
+
 			box-shadow:
-				var(--shadow-soft),
-				0 0 0 1px rgba(255, 255, 255, 0.5);
+				var(--shadow-float),
+				inset 0 1px 0 rgba(255,255,255,0.55),
+				0 0 0 1px rgba(255,255,255,0.08);
+
 			position: relative;
+			overflow: hidden;
+			transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal), background var(--transition-slow);
 		}
 
-		/* Dark */
-		body[data-theme="dark"] .container {
-			background: rgba(15, 23, 42, 0.92);
-			box-shadow:
-				var(--shadow-soft-strong),
-				0 0 0 1px rgba(148, 163, 184, 0.35);
+		/* Soft specular highlight */
+		.container::after {
+			content: "";
+			position: absolute;
+			inset: -30% -10% auto -10%;
+			height: 140px;
+			background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+			opacity: 0.55;
+			transform: translateY(-10px);
+			pointer-events: none;
 		}
+
+		/* Hover lift for desktop */
+		@media (hover: hover) {
+			.container:hover {
+				transform: translateY(-1px);
+				box-shadow:
+					0 26px 60px rgba(2, 6, 23, 0.14),
+					inset 0 1px 0 rgba(255,255,255,0.6),
+					0 0 0 1px rgba(255,255,255,0.1);
+			}
+		}
+
+		/* Dark container */
+		body[data-theme="dark"] .container {
+			background:
+				linear-gradient(135deg, var(--glass-dark-1), var(--glass-dark-2) 45%, var(--glass-dark-3));
+			border-color: var(--glass-dark-border);
+
+			box-shadow:
+				0 24px 56px rgba(0, 0, 0, 0.55),
+				inset 0 1px 0 rgba(148,163,184,0.18),
+				0 0 0 1px rgba(148,163,184,0.08);
+		}
+
 
 		/* ============================================================
-		   FORM – INPUT, SELECT, SUBMIT
+		   FORM – LABEL / INPUT / SELECT
 		   ============================================================ */
 		label {
 			display: block;
 			margin-bottom: 6px;
-			font-weight: 600;
-			color: #374151;
+			font-weight: 650;
+			color: #334155;
 		}
 
 		body[data-theme="dark"] label {
 			color: #e5e7eb;
 		}
 
+		/* Base inputs */
 		input,
 		select {
 			width: 100%;
 			box-sizing: border-box;
-			padding: 13px 14px;
-			border: none;
+
+			padding: 14px 14px;
 			border-radius: var(--radius-md);
+			border: 1px solid rgba(255,255,255,0.0);
+
 			background: var(--input-bg-light);
-			box-shadow: var(--shadow-inset-soft);
+			backdrop-filter: var(--blur-medium);
+			-webkit-backdrop-filter: var(--blur-medium);
+
+			box-shadow: var(--shadow-inset-soft), 0 0 0 1px rgba(255,255,255,0.35);
 			font-size: 15px;
-			transition: var(--transition-normal);
+
 			color: var(--text-main);
+			transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
 		}
 
 		input::placeholder,
@@ -232,76 +352,178 @@
 			color: var(--text-muted);
 		}
 
-		/* Dark input */
+		/* Dark inputs */
 		body[data-theme="dark"] input,
 		body[data-theme="dark"] select {
 			background: var(--input-bg-dark);
 			color: #e5e7eb;
+
 			box-shadow:
-				3px 3px 8px rgba(0, 0, 0, 0.7),
-				-3px -3px 8px rgba(15, 23, 42, 0.7);
+				inset 2px 2px 8px rgba(0, 0, 0, 0.45),
+				inset -2px -2px 10px rgba(30, 41, 59, 0.35),
+				0 0 0 1px rgba(148,163,184,0.14);
+			border-color: rgba(255,255,255,0.0);
 		}
 
 		body[data-theme="dark"] input::placeholder {
 			color: #6b7280;
 		}
 
-		/* Focus state */
+		/* Focus states */
 		input:focus,
 		select:focus {
 			outline: none;
 			transform: translateY(-1px);
+			border-color: rgba(59,130,246,0.35);
 			box-shadow:
-				4px 4px 10px rgba(15, 23, 42, 0.12),
-				-4px -4px 10px rgba(255, 255, 255, 0.9),
-				0 0 0 2px rgba(56, 189, 248, 0.2);
+				var(--focus-ring),
+				inset 0 1px 2px rgba(255,255,255,0.22);
 		}
 
-		/* Submit – gradient nút chính */
+		/* Readonly subtle style */
+		input[readonly] {
+			cursor: default;
+			opacity: 0.95;
+		}
+
+		/* Submit – primary */
 		input[type="submit"] {
 			margin-top: 6px;
 			width: 100%;
-			background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+
+			background:
+				linear-gradient(135deg, var(--accent), var(--accent-strong));
 			color: #ffffff;
-			border-radius: var(--radius-md);
+
+			border-radius: 16px;
 			padding: 14px 16px;
+
 			font-size: 16px;
-			font-weight: 600;
+			font-weight: 700;
+			letter-spacing: 0.01em;
+
 			cursor: pointer;
-			box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
-			border: none;
-			transition: var(--transition-normal);
+			border: 1px solid rgba(255,255,255,0.2);
+
+			box-shadow:
+				0 10px 26px rgba(37, 99, 235, 0.32),
+				0 0 0 1px rgba(255,255,255,0.12),
+				0 0 24px var(--accent-glow);
+
+			transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast), opacity var(--transition-fast), background-position var(--transition-fast);
+			background-size: 120% 120%;
 		}
 
 		input[type="submit"]:hover:not(:disabled) {
 			transform: translateY(-2px);
-			box-shadow: 0 14px 35px rgba(37, 99, 235, 0.45);
 			filter: brightness(1.03);
+			box-shadow:
+				0 14px 38px rgba(37, 99, 235, 0.42),
+				0 0 0 1px rgba(255,255,255,0.18),
+				0 0 30px var(--accent-glow);
+		}
+
+		input[type="submit"]:active:not(:disabled) {
+			transform: translateY(-1px) scale(0.99);
+			filter: brightness(0.99);
 		}
 
 		input[type="submit"]:disabled {
-			background: #cbd5f5;
+			background: linear-gradient(135deg, #cbd5f5, #dbeafe);
 			box-shadow: none;
 			cursor: default;
+			opacity: 0.85;
 		}
 
 		/* Dark submit */
 		body[data-theme="dark"] input[type="submit"] {
-			box-shadow: 0 12px 32px rgba(37, 99, 235, 0.55);
+			box-shadow:
+				0 14px 38px rgba(37, 99, 235, 0.52),
+				0 0 26px rgba(59,130,246,0.35);
 		}
 
+
 		/* ============================================================
-		   TABS – MODERN PILL NAVIGATION
+		   BUTTON SYSTEM (optional, compatible with existing)
+		   ============================================================ */
+		.btn,
+		.ghost-btn,
+		.theme-toggle-btn,
+		.saved-actions button,
+		.clear-ssid-btn {
+			-webkit-tap-highlight-color: transparent;
+		}
+
+		/* Ghost button – iOS 26 glass pill */
+		.ghost-btn {
+			border-radius: var(--radius-pill);
+			border: 1px solid rgba(148, 163, 184, 0.28);
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.35));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			font-size: 12.8px;
+			padding: 7px 12px;
+			cursor: pointer;
+
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+
+			color: #0f172a;
+			box-shadow: var(--shadow-float-tight), inset 0 1px 0 rgba(255,255,255,0.6);
+			transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+		}
+
+		.ghost-btn:hover {
+			transform: translateY(-1px);
+			border-color: rgba(59,130,246,0.22);
+			box-shadow:
+				0 12px 24px rgba(2,6,23,0.10),
+				0 0 0 1px rgba(59,130,246,0.08);
+		}
+
+		.ghost-btn:active {
+			transform: translateY(0) scale(0.99);
+		}
+
+		/* Dark ghost */
+		body[data-theme="dark"] .ghost-btn {
+			color: #e5e7eb;
+			border-color: rgba(148,163,184,0.22);
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.65), rgba(2,6,23,0.35));
+			box-shadow:
+				0 10px 22px rgba(0,0,0,0.55),
+				inset 0 1px 0 rgba(148,163,184,0.12);
+		}
+
+
+		/* ============================================================
+		   TABS – iOS 26 PILL NAV
 		   ============================================================ */
 		.tabs {
 			max-width: var(--max-width-desktop);
-			margin: 20px auto 12px;
+			margin: 18px auto 12px;
+
 			display: flex;
-			padding: 4px;
+			padding: 6px;
 			gap: 6px;
+
 			border-radius: var(--radius-pill);
-			background: rgba(255, 255, 255, 0.5);
-			backdrop-filter: blur(12px);
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
+			backdrop-filter: var(--blur-medium);
+			-webkit-backdrop-filter: var(--blur-medium);
+
+			border: 1px solid rgba(255,255,255,0.45);
+			box-shadow:
+				var(--shadow-soft),
+				inset 0 1px 0 rgba(255,255,255,0.55);
+
 			overflow-x: auto;
 			white-space: nowrap;
 			scrollbar-width: none;
@@ -314,51 +536,74 @@
 		.tab {
 			padding: 9px 16px;
 			cursor: pointer;
-			border-radius: 999px;
-			background: rgba(241, 245, 249, 0.85);
-			font-weight: 600;
-			font-size: 14px;
+
+			border-radius: var(--radius-pill);
+			background: rgba(241, 245, 249, 0.75);
+
+			font-weight: 650;
+			font-size: 13.6px;
+
 			flex-shrink: 0;
-			border: 1px solid rgba(148, 163, 184, 0.25);
-			color: #111827;
+
+			border: 1px solid rgba(148, 163, 184, 0.18);
+			color: #0f172a;
+
 			display: inline-flex;
 			align-items: center;
 			gap: 6px;
-			transition: var(--transition-fast);
+
+			transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
 		}
 
 		.tab:hover {
-			background: rgba(226, 232, 240, 0.95);
+			background: rgba(226, 232, 240, 0.9);
 		}
 
 		.tab.active {
-			background: #ffffff;
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.9));
 			color: var(--accent-strong);
+
+			border-color: rgba(59,130,246,0.22);
+
 			box-shadow:
-				0 3px 12px rgba(15, 23, 42, 0.1),
-				0 0 0 1px rgba(191, 219, 254, 1);
+				0 6px 14px rgba(2, 6, 23, 0.08),
+				0 0 0 1px rgba(191, 219, 254, 0.85),
+				0 0 18px rgba(59,130,246,0.12);
 		}
 
 		/* Dark tabs */
 		body[data-theme="dark"] .tabs {
-			background: rgba(15, 23, 42, 0.95);
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.85), rgba(2,6,23,0.55));
+			border-color: rgba(148,163,184,0.18);
+
+			box-shadow:
+				0 14px 34px rgba(0, 0, 0, 0.55),
+				inset 0 1px 0 rgba(148,163,184,0.12);
 		}
 
 		body[data-theme="dark"] .tab {
-			background: rgba(15, 23, 42, 0.9);
+			background: rgba(2, 6, 23, 0.72);
 			color: #e5e7eb;
 			border-color: rgba(51, 65, 85, 0.9);
+
 			box-shadow:
-				inset 1px 1px 2px rgba(148, 163, 184, 0.45),
-				inset -1px -1px 3px rgba(0, 0, 0, 0.9);
+				inset 1px 1px 2px rgba(148, 163, 184, 0.14),
+				inset -1px -1px 3px rgba(0, 0, 0, 0.5);
 		}
 
 		body[data-theme="dark"] .tab.active {
-			background: #020617;
-			color: #60a5fa;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,1), rgba(2,6,23,0.9));
+			color: #93c5fd;
+
+			border-color: rgba(59,130,246,0.35);
+
 			box-shadow:
-				0 3px 14px rgba(0, 0, 0, 0.9),
-				0 0 0 1px rgba(37, 99, 235, 0.7);
+				0 8px 18px rgba(0, 0, 0, 0.7),
+				0 0 0 1px rgba(37, 99, 235, 0.55),
+				0 0 18px rgba(59,130,246,0.18);
 		}
 
 		/* Tab content */
@@ -374,125 +619,152 @@
 		}
 
 		@keyframes fade-slide {
-			from {
-				opacity: 0;
-				transform: translateY(8px);
-			}
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
+			from { opacity: 0; transform: translateY(8px); }
+			to   { opacity: 1; transform: translateY(0); }
 		}
 
+
 		/* ============================================================
-		   THANH ĐỔI NGÔN NGỮ + THEME – TOP BAR
+		   TOP BAR – LANGUAGE + THEME
 		   ============================================================ */
 		.language-switch {
 			position: fixed;
 			top: 8px;
 			left: 50%;
 			transform: translateX(-50%);
+
 			width: min(var(--max-width-desktop), 100% - 24px);
+
 			display: flex;
 			justify-content: flex-end;
 			align-items: center;
 			gap: 8px;
+
 			z-index: 1000;
-			padding: 6px 10px;
+			padding: 8px 10px;
+
 			border-radius: var(--radius-pill);
-			background: rgba(255, 255, 255, 0.92);
-			backdrop-filter: blur(14px) saturate(180%);
-			box-shadow: 0 6px 20px rgba(15, 23, 42, 0.14);
+
+			background:
+				linear-gradient(135deg, var(--glass-1), var(--glass-2));
+			backdrop-filter: var(--blur-medium);
+			-webkit-backdrop-filter: var(--blur-medium);
+
+			border: 1px solid rgba(255,255,255,0.45);
+
+			box-shadow:
+				0 10px 26px rgba(2,6,23,0.12),
+				inset 0 1px 0 rgba(255,255,255,0.6);
 		}
 
-		/* Phone / small width */
+		/* Phone */
 		@media (max-width: 600px) {
 			.language-switch {
 				width: 100%;
 				border-radius: 0 0 18px 18px;
-				padding: 8px 14px;
+				padding: 10px 14px;
 				justify-content: space-between;
 			}
 		}
 
+		/* Language select */
 		.language-switch select {
 			padding: 6px 10px;
-			font-size: 14px;
-			border-radius: 999px;
-			background: #ffffff;
-			border: 1px solid #e5e7eb;
+			font-size: 13.5px;
+			border-radius: var(--radius-pill);
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+
+			border: 1px solid rgba(148,163,184,0.22);
+
 			box-shadow:
-				1px 1px 4px rgba(15, 23, 42, 0.08),
-				-1px -1px 4px rgba(255, 255, 255, 0.8);
+				0 4px 10px rgba(2,6,23,0.06),
+				inset 0 1px 0 rgba(255,255,255,0.65);
+
+			color: #0f172a;
 		}
 
 		/* Dark top bar */
 		body[data-theme="dark"] .language-switch {
-			background: rgba(15, 23, 42, 0.98);
-			box-shadow: 0 10px 28px rgba(0, 0, 0, 0.9);
+			background:
+				linear-gradient(135deg, var(--glass-dark-1), var(--glass-dark-2));
+			border-color: rgba(148,163,184,0.18);
+
+			box-shadow:
+				0 14px 34px rgba(0, 0, 0, 0.75),
+				inset 0 1px 0 rgba(148,163,184,0.12);
 		}
 
 		body[data-theme="dark"] .language-switch select {
-			background: #020617;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.98), rgba(2,6,23,0.85));
 			color: #e5e7eb;
-			border-color: #4b5563;
+			border-color: rgba(148,163,184,0.25);
 			box-shadow:
-				1px 1px 4px rgba(0, 0, 0, 0.7),
-				-1px -1px 3px rgba(15, 23, 42, 0.7);
+				0 6px 14px rgba(0,0,0,0.55),
+				inset 0 1px 0 rgba(148,163,184,0.12);
 		}
 
-		/* Nút đổi theme */
+		/* Theme toggle button */
 		.theme-toggle-btn {
 			border-radius: var(--radius-pill);
-			border: 1px solid rgba(148, 163, 184, 0.8);
-			background: rgba(248, 250, 252, 0.96);
-			font-size: 13px;
-			padding: 4px 12px;
+			border: 1px solid rgba(148, 163, 184, 0.28);
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			font-size: 12.5px;
+			padding: 6px 12px;
+
 			cursor: pointer;
+
 			display: inline-flex;
 			align-items: center;
 			gap: 6px;
+
+			color: #0f172a;
+			font-weight: 650;
+
 			box-shadow:
-				1px 1px 3px rgba(15, 23, 42, 0.08),
-				-1px -1px 3px rgba(255, 255, 255, 0.8);
+				0 6px 16px rgba(2,6,23,0.08),
+				inset 0 1px 0 rgba(255,255,255,0.65);
+
+			transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
 		}
 
 		.theme-toggle-btn span {
-			font-size: 11px;
+			font-size: 10.5px;
 			text-transform: uppercase;
 			letter-spacing: 0.08em;
 		}
 
+		.theme-toggle-btn:hover {
+			transform: translateY(-1px);
+			border-color: rgba(59,130,246,0.22);
+			box-shadow:
+				0 10px 22px rgba(2,6,23,0.12),
+				0 0 0 1px rgba(59,130,246,0.08);
+		}
+
 		.theme-toggle-btn:focus {
 			outline: none;
-			box-shadow:
-				0 0 0 2px rgba(59, 130, 246, 0.25),
-				1px 1px 3px rgba(0, 0, 0, 0.12);
+			box-shadow: var(--focus-ring);
 		}
 
-		/* Dark button */
+		/* Dark theme toggle */
 		body[data-theme="dark"] .theme-toggle-btn {
-			background: rgba(15, 23, 42, 0.98);
-			border-color: #4b5563;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.95), rgba(2,6,23,0.75));
+			border-color: rgba(148,163,184,0.28);
 			color: #e5e7eb;
+			box-shadow:
+				0 10px 22px rgba(0,0,0,0.65),
+				inset 0 1px 0 rgba(148,163,184,0.12);
 		}
 
-		/* Ghost button (secondary) */
-		.ghost-btn {
-			border-radius: var(--radius-pill);
-			border: 1px solid rgba(148, 163, 184, 0.7);
-			background: rgba(248, 250, 252, 0.96);
-			font-size: 13px;
-			padding: 6px 12px;
-			cursor: pointer;
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
-		}
-
-		.ghost-btn:hover {
-			background: #eef2ff;
-		}
 
 		/* ============================================================
 		   BADGE / CHIP
@@ -501,9 +773,9 @@
 			display: inline-flex;
 			align-items: center;
 			border-radius: var(--radius-pill);
-			padding: 2px 8px;
-			font-size: 11px;
-			font-weight: 600;
+			padding: 3px 9px;
+			font-size: 10.5px;
+			font-weight: 700;
 			text-transform: uppercase;
 			letter-spacing: 0.08em;
 		}
@@ -513,42 +785,55 @@
 			color: var(--accent-strong);
 		}
 
+
 		/* ============================================================
-		   AP LIST – DANH SÁCH WIFI
+		   AP LIST – WIFI SCAN LIST
 		   ============================================================ */
 		#ap_list {
 			margin-top: 18px;
-			border-top: 1px solid #e5e7eb;
+			border-top: 1px solid rgba(148,163,184,0.25);
 			padding-top: 12px;
 		}
 
 		#ap_list .scanning {
 			font-style: italic;
 			color: var(--text-muted);
-			font-size: 13px;
+			font-size: 12.8px;
 		}
 
 		#ap_list p {
 			margin: 6px 0 10px;
-			font-size: 13px;
+			font-size: 12.8px;
 			color: var(--text-muted);
 		}
 
+		/* AP item */
 		#ap_list a {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
+
 			margin-top: 8px;
-			padding: 11px 13px;
-			background: #ffffff;
+			padding: 12px 13px;
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.7));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
 			border-radius: 16px;
 			text-decoration: none;
-			color: #111827;
-			font-weight: 500;
+
+			color: #0f172a;
+			font-weight: 560;
+
+			border: 1px solid rgba(148,163,184,0.18);
+
 			box-shadow:
-				0 4px 12px rgba(15, 23, 42, 0.08),
-				inset 0 0 0 1px rgba(243, 244, 246, 0.95);
-			transition: var(--transition-fast);
+				0 8px 18px rgba(2,6,23,0.06),
+				inset 0 1px 0 rgba(255,255,255,0.7);
+
+			transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
 		}
 
 		.ap-ssid {
@@ -559,7 +844,7 @@
 		}
 
 		.ap-meta {
-			font-size: 12px;
+			font-size: 11.8px;
 			color: var(--text-muted);
 			display: inline-flex;
 			align-items: center;
@@ -567,8 +852,13 @@
 		}
 
 		#ap_list a:hover {
-			background: #eff6ff;
-			transform: translateY(-2px);
+			background:
+				linear-gradient(135deg, rgba(239,246,255,0.95), rgba(255,255,255,0.75));
+			transform: translateY(-1px);
+			border-color: rgba(59,130,246,0.18);
+			box-shadow:
+				0 12px 26px rgba(2,6,23,0.10),
+				0 0 0 1px rgba(59,130,246,0.06);
 		}
 
 		.wifi-actions {
@@ -578,27 +868,34 @@
 			margin-bottom: 4px;
 		}
 
-		/* Dark wifi */
+		/* Dark wifi list */
 		body[data-theme="dark"] #ap_list {
-			border-top-color: #1f2937;
+			border-top-color: rgba(148,163,184,0.18);
 		}
 
 		body[data-theme="dark"] #ap_list a {
-			background: #020617;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.98), rgba(2,6,23,0.75));
 			color: #e5e7eb;
+
+			border-color: rgba(148,163,184,0.18);
+
 			box-shadow:
-				0 3px 12px rgba(0, 0, 0, 0.78),
-				inset 1px 1px 2px rgba(30, 64, 175, 0.6),
-				inset -1px -1px 3px rgba(0, 0, 0, 0.9);
+				0 10px 22px rgba(0,0,0,0.7),
+				inset 0 1px 0 rgba(148,163,184,0.12);
 		}
 
 		body[data-theme="dark"] #ap_list a:hover {
-			background: #020617;
 			transform: translateY(-1px);
+			border-color: rgba(59,130,246,0.28);
+			box-shadow:
+				0 14px 30px rgba(0,0,0,0.8),
+				0 0 0 1px rgba(59,130,246,0.10);
 		}
 
+
 		/* ============================================================
-		   PASSWORD + SSID
+		   PASSWORD + SSID ROW
 		   ============================================================ */
 		.password-wrapper {
 			position: relative;
@@ -607,27 +904,55 @@
 		}
 
 		.password-wrapper input {
-			padding-right: 42px;
+			padding-right: 44px;
 		}
 
 		.toggle-password {
 			position: absolute;
-			right: 12px;
-			background: transparent;
-			border: none;
+			right: 10px;
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.35));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			border: 1px solid rgba(148,163,184,0.18);
+			border-radius: 10px;
+
 			cursor: pointer;
-			font-size: 16px;
-			opacity: 0.7;
-			color: #4b5563;
+			font-size: 14.5px;
+			padding: 4px 7px;
+
+			opacity: 0.85;
+			color: #334155;
+
+			box-shadow:
+				0 4px 10px rgba(2,6,23,0.06),
+				inset 0 1px 0 rgba(255,255,255,0.65);
+
+			transition: opacity var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+		}
+
+		.toggle-password:hover {
+			opacity: 1;
+			transform: translateY(-1px);
+			border-color: rgba(59,130,246,0.18);
 		}
 
 		body[data-theme="dark"] .toggle-password {
-			color: #9ca3af;
+			color: #cbd5e1;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.9), rgba(2,6,23,0.55));
+			border-color: rgba(148,163,184,0.2);
+			box-shadow:
+				0 6px 12px rgba(0,0,0,0.6),
+				inset 0 1px 0 rgba(148,163,184,0.1);
 		}
 
 		.toggle-password:focus {
 			outline: none;
 			opacity: 1;
+			box-shadow: var(--focus-ring);
 		}
 
 		.ssid-row {
@@ -640,108 +965,155 @@
 			flex: 1;
 		}
 
+		/* Clear SSID button */
 		.clear-ssid-btn {
 			border-radius: var(--radius-pill);
-			border: 1px solid rgba(248, 113, 113, 0.6);
-			background: rgba(254, 242, 242, 0.9);
-			font-size: 13px;
+			border: 1px solid rgba(248, 113, 113, 0.45);
+
+			background:
+				linear-gradient(135deg, rgba(254,242,242,0.95), rgba(254,242,242,0.65));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			font-size: 12.2px;
 			padding: 6px 10px;
 			cursor: pointer;
+
+			color: #b91c1c;
+			font-weight: 650;
+
+			box-shadow:
+				0 6px 14px rgba(2,6,23,0.06),
+				inset 0 1px 0 rgba(255,255,255,0.7);
+
+			transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 		}
 
 		.clear-ssid-btn:hover {
-			background: #fee2e2;
+			transform: translateY(-1px);
+			background:
+				linear-gradient(135deg, rgba(254,226,226,0.98), rgba(254,242,242,0.75));
 		}
 
+
 		/* ============================================================
-		   SWITCH "SỬ DỤNG MẠNG ẨN" – iOS STYLE
+		   HIDDEN SSID SWITCH – iOS-STYLE ENHANCED
+		   (Markup updated below to match this style)
 		   ============================================================ */
 		.hidden-ssid-toggle {
 			display: inline-flex;
 			align-items: center;
 			gap: 10px;
 			margin-top: 10px;
-			font-size: 13px;
+
+			font-size: 12.8px;
 			color: var(--text-muted);
+
 			cursor: pointer;
 			user-select: none;
+			position: relative;
 		}
 
-		/* Ẩn checkbox nguyên bản nhưng vẫn giữ cho screen reader */
+		/* Hide native checkbox but keep accessible */
 		.hidden-ssid-toggle input[type="checkbox"] {
 			position: absolute;
 			opacity: 0;
 			pointer-events: none;
 		}
 
-		/* Track của switch */
+		/* Track */
 		.hidden-ssid-switch {
 			position: relative;
 			flex-shrink: 0;
-			width: 40px;
-			height: 22px;
+			width: 42px;
+			height: 24px;
 			border-radius: 999px;
-			background: #e5e7eb;
+
+			background:
+				linear-gradient(135deg, #eef2f7, #e5e7eb);
+
+			border: 1px solid rgba(148,163,184,0.25);
+
 			box-shadow:
-				inset 0 1px 2px rgba(148, 163, 184, 0.65),
-				0 1px 2px rgba(148, 163, 184, 0.55);
-			transition: background 0.18s ease-out, box-shadow 0.18s ease-out;
+				inset 0 1px 2px rgba(148, 163, 184, 0.55),
+				0 2px 6px rgba(2,6,23,0.08);
+
+			transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 		}
 
-		/* Nút tròn */
+		/* Knob */
 		.hidden-ssid-knob {
 			position: absolute;
 			top: 2px;
 			left: 2px;
-			width: 18px;
-			height: 18px;
+
+			width: 18.5px;
+			height: 18.5px;
 			border-radius: 999px;
-			background: #ffffff;
+
+			background:
+				linear-gradient(135deg, #ffffff, #f8fafc);
+
+			border: 1px solid rgba(148,163,184,0.25);
+
 			box-shadow:
-				0 2px 4px rgba(148, 163, 184, 0.9),
-				0 0 0 1px rgba(209, 213, 219, 0.9);
-			transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+				0 3px 6px rgba(148, 163, 184, 0.65),
+				inset 0 1px 0 rgba(255,255,255,0.7);
+
+			transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
 		}
 
 		.hidden-ssid-text {
 			line-height: 1.4;
 		}
 
-		/* Trạng thái CHECKED */
+		/* Checked */
 		.hidden-ssid-toggle input[type="checkbox"]:checked + .hidden-ssid-switch {
-			background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+			background:
+				linear-gradient(135deg, var(--accent), var(--accent-strong));
+			border-color: rgba(59,130,246,0.35);
+
 			box-shadow:
-				0 3px 8px rgba(37, 99, 235, 0.6),
-				0 0 0 1px rgba(191, 219, 254, 0.9);
+				0 4px 10px rgba(37, 99, 235, 0.45),
+				0 0 0 1px rgba(191, 219, 254, 0.85),
+				0 0 14px rgba(59,130,246,0.18);
 		}
 
 		.hidden-ssid-toggle input[type="checkbox"]:checked + .hidden-ssid-switch .hidden-ssid-knob {
 			transform: translateX(18px);
+			border-color: rgba(191,219,254,0.8);
+
 			box-shadow:
-				0 2px 6px rgba(15, 23, 42, 0.7),
-				0 0 0 1px rgba(191, 219, 254, 1);
+				0 3px 8px rgba(2, 6, 23, 0.35),
+				inset 0 1px 0 rgba(255,255,255,0.65);
 		}
 
-		/* Focus bằng bàn phím */
+		/* Keyboard focus */
 		.hidden-ssid-toggle input[type="checkbox"]:focus-visible + .hidden-ssid-switch {
 			box-shadow:
-				0 0 0 2px rgba(59, 130, 246, 0.4),
+				var(--focus-ring),
 				0 0 0 1px rgba(191, 219, 254, 1);
 		}
 
 		/* Dark switch */
 		body[data-theme="dark"] .hidden-ssid-switch {
-			background: #020617;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.95), rgba(2,6,23,0.7));
+			border-color: rgba(148,163,184,0.22);
+
 			box-shadow:
-				inset 0 1px 2px rgba(15, 23, 42, 0.9),
-				0 1px 2px rgba(0, 0, 0, 0.8);
+				inset 0 1px 2px rgba(0,0,0,0.65),
+				0 2px 6px rgba(0,0,0,0.7);
 		}
 
 		body[data-theme="dark"] .hidden-ssid-knob {
-			background: #e5e7eb;
+			background:
+				linear-gradient(135deg, #e5e7eb, #cbd5e1);
+			border-color: rgba(59,130,246,0.25);
+
 			box-shadow:
-				0 2px 5px rgba(0, 0, 0, 0.9),
-				0 0 0 1px rgba(30, 64, 175, 0.8);
+				0 3px 8px rgba(0, 0, 0, 0.75),
+				inset 0 1px 0 rgba(255,255,255,0.35);
 		}
 
 		body[data-theme="dark"] .hidden-ssid-toggle {
@@ -750,19 +1122,16 @@
 
 		body[data-theme="dark"] .hidden-ssid-toggle input[type="checkbox"]:checked + .hidden-ssid-switch {
 			background: linear-gradient(135deg, #60a5fa, #3b82f6);
+			border-color: rgba(59,130,246,0.55);
 			box-shadow:
-				0 3px 10px rgba(37, 99, 235, 0.8),
-				0 0 0 1px rgba(59, 130, 246, 0.85);
+				0 6px 14px rgba(37, 99, 235, 0.55),
+				0 0 0 1px rgba(59, 130, 246, 0.5),
+				0 0 16px rgba(59,130,246,0.22);
 		}
 
-		body[data-theme="dark"] .hidden-ssid-toggle input[type="checkbox"]:checked + .hidden-ssid-switch .hidden-ssid-knob {
-			box-shadow:
-				0 2px 6px rgba(15, 23, 42, 1),
-				0 0 0 1px rgba(191, 219, 254, 0.95);
-		}
 
 		/* ============================================================
-		   DANH SÁCH WIFI ĐÃ LƯU
+		   SAVED WIFI LIST
 		   ============================================================ */
 		#saved_list {
 			list-style: none;
@@ -774,14 +1143,24 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 9px 11px;
-			margin-top: 6px;
+
+			padding: 10px 12px;
+			margin-top: 7px;
+
 			border-radius: 14px;
-			background: rgba(248, 250, 252, 0.94);
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.65));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			border: 1px solid rgba(148,163,184,0.16);
+
 			box-shadow:
-				0 2px 8px rgba(15, 23, 42, 0.06),
-				inset 0 0 0 1px rgba(255, 255, 255, 0.9);
-			font-size: 14px;
+				0 6px 14px rgba(2, 6, 23, 0.06),
+				inset 0 1px 0 rgba(255,255,255,0.7);
+
+			font-size: 13.8px;
 		}
 
 		.saved-ssid {
@@ -799,94 +1178,154 @@
 
 		.saved-actions button {
 			border-radius: var(--radius-pill);
-			border: 1px solid rgba(148, 163, 184, 0.7);
-			background: rgba(248, 250, 252, 0.96);
-			font-size: 12px;
+			border: 1px solid rgba(148, 163, 184, 0.25);
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			font-size: 11.5px;
 			padding: 4px 9px;
+
 			cursor: pointer;
+			color: #0f172a;
+
+			box-shadow:
+				0 4px 10px rgba(2,6,23,0.06),
+				inset 0 1px 0 rgba(255,255,255,0.7);
+
+			transition: background var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 		}
 
 		.saved-actions button:hover {
-			background: #fee2e2;
+			transform: translateY(-1px);
+			background:
+				linear-gradient(135deg, rgba(254,226,226,0.95), rgba(254,242,242,0.75));
+			border-color: rgba(248, 113, 113, 0.45);
 		}
 
-		/* Dark saved wifi */
+		/* Dark saved list */
 		body[data-theme="dark"] #saved_list li {
-			background: #020617;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.98), rgba(2,6,23,0.75));
+			border-color: rgba(148,163,184,0.18);
 			box-shadow:
-				0 3px 12px rgba(0, 0, 0, 0.85),
-				inset 1px 1px 2px rgba(30, 64, 175, 0.55);
+				0 10px 22px rgba(0,0,0,0.75),
+				inset 0 1px 0 rgba(148,163,184,0.1);
 		}
+
+		body[data-theme="dark"] .saved-actions button {
+			color: #e5e7eb;
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.9), rgba(2,6,23,0.6));
+			border-color: rgba(148,163,184,0.22);
+			box-shadow:
+				0 6px 12px rgba(0,0,0,0.6),
+				inset 0 1px 0 rgba(148,163,184,0.1);
+		}
+
 
 		/* ============================================================
-		   SECTION / NHÓM NÂNG CAO
+		   SECTION GROUP
 		   ============================================================ */
 		.section-group {
 			margin-top: 18px;
-			padding-top: 10px;
-			border-top: 1px dashed rgba(148, 163, 184, 0.5);
+			padding-top: 12px;
+			border-top: 1px dashed rgba(148, 163, 184, 0.38);
 		}
 
 		.section-label {
-			font-size: 11px;
+			font-size: 10.5px;
 			letter-spacing: 0.14em;
 			text-transform: uppercase;
 			color: var(--text-soft);
 			margin-bottom: 8px;
+			font-weight: 700;
 		}
 
+
 		/* ============================================================
-		   FEATURE TAGS / CHIPS (SD MUSIC AI)
+		   FEATURE CHIPS (SD MUSIC AI)
 		   ============================================================ */
 		.feature-chips {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 6px;
-			margin-top: 6px;
+			margin-top: 8px;
 		}
 
 		.feature-chip {
-			font-size: 11px;
-			padding: 4px 8px;
+			font-size: 10.7px;
+			padding: 5px 9px;
 			border-radius: var(--radius-pill);
-			background: rgba(148, 163, 184, 0.08);
-			color: #4b5563;
+
+			background:
+				linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			color: #334155;
+
 			display: inline-flex;
 			align-items: center;
-			gap: 4px;
-			border: 1px solid rgba(148, 163, 184, 0.35);
+			gap: 6px;
+
+			border: 1px solid rgba(148, 163, 184, 0.22);
+
+			box-shadow:
+				0 4px 10px rgba(2,6,23,0.05),
+				inset 0 1px 0 rgba(255,255,255,0.7);
 		}
 
 		.feature-chip code {
-			font-size: 11px;
+			font-size: 10.7px;
 			background: transparent;
 			padding: 0;
 		}
 
 		/* Dark chips */
 		body[data-theme="dark"] .feature-chip {
-			background: rgba(30, 64, 175, 0.18);
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.9), rgba(2,6,23,0.55));
 			color: #e5e7eb;
-			border-color: rgba(96, 165, 250, 0.5);
+			border-color: rgba(96, 165, 250, 0.25);
+			box-shadow:
+				0 6px 12px rgba(0,0,0,0.6),
+				inset 0 1px 0 rgba(148,163,184,0.08);
 		}
 
+
 		/* ============================================================
-		   TOAST – THÔNG BÁO NỔI
+		   TOAST – FLOATING GLASS
 		   ============================================================ */
 		.toast {
 			position: fixed;
 			bottom: 30px;
 			left: 50%;
 			transform: translateX(-50%);
-			background: rgba(15, 23, 42, 0.96);
-			color: #f9fafb;
+
+			background:
+				linear-gradient(135deg, rgba(2,6,23,0.92), rgba(2,6,23,0.78));
+			backdrop-filter: var(--blur-soft);
+			-webkit-backdrop-filter: var(--blur-soft);
+
+			color: #f8fafc;
 			padding: 12px 22px;
+
 			border-radius: 14px;
+			border: 1px solid rgba(148,163,184,0.18);
+
 			z-index: 1200;
 			opacity: 0;
-			transition: opacity 0.3s ease, transform 0.25s ease-out;
-			font-size: 14px;
-			box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+
+			transition: opacity var(--transition-normal), transform var(--transition-normal);
+			font-size: 13.8px;
+
+			box-shadow:
+				0 10px 30px rgba(0, 0, 0, 0.35),
+				0 0 0 1px rgba(255,255,255,0.05);
+
 			pointer-events: none;
 		}
 
@@ -897,8 +1336,10 @@
 
 		/* Light toast tone */
 		body[data-theme="light"] .toast {
-			background: rgba(31, 41, 55, 0.96);
+			background:
+				linear-gradient(135deg, rgba(17,24,39,0.96), rgba(17,24,39,0.88));
 		}
+
 
 		/* ============================================================
 		   LOADING OVERLAY
@@ -907,11 +1348,14 @@
 			display: none;
 			position: fixed;
 			inset: 0;
-			background-color: rgba(15, 23, 42, 0.48);
+
+			background-color: rgba(2, 6, 23, 0.45);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+
 			z-index: 2000;
 			justify-content: center;
 			align-items: center;
-			backdrop-filter: blur(8px);
 		}
 
 		.loading-overlay.show {
@@ -929,20 +1373,28 @@
 			width: 56px;
 			height: 56px;
 			border-radius: 999px;
-			border: 5px solid rgba(255, 255, 255, 0.28);
+
+			border: 5px solid rgba(255, 255, 255, 0.22);
 			border-top-color: #ffffff;
+
 			animation: spin 1s linear infinite;
+
+			box-shadow:
+				0 10px 22px rgba(0,0,0,0.25),
+				inset 0 1px 0 rgba(255,255,255,0.25);
 		}
 
 		.loading-text {
 			color: #ffffff;
-			font-size: 15px;
-			font-weight: 600;
+			font-size: 14.8px;
+			font-weight: 650;
+			letter-spacing: 0.01em;
 		}
 
 		@keyframes spin {
 			to { transform: rotate(360deg); }
 		}
+
 
 		/* ============================================================
 		   FOOTER
@@ -950,15 +1402,18 @@
 		.footer {
 			max-width: var(--max-width-desktop);
 			margin: 0 auto 24px;
-			font-size: 12px;
+
+			font-size: 11.6px;
 			color: var(--text-muted);
 			text-align: center;
 			line-height: 1.6;
+
+			opacity: 0.95;
 		}
 
 		.footer span.footer-highlight {
-			font-weight: 600;
-			color: #111827;
+			font-weight: 700;
+			color: #0f172a;
 		}
 
 		body[data-theme="dark"] .footer {
@@ -967,6 +1422,265 @@
 
 		body[data-theme="dark"] .footer span.footer-highlight {
 			color: #e5e7eb;
+		}
+
+
+		/* ============================================================
+		   2025.4 PRO+ PACK (INTEGRATED)
+		   - Pointer-tracking glass highlight
+		   - Subtle premium sheen
+		   - Button loading state
+		   - Enhanced tab animation
+		   - Low-power glass switch
+		   ============================================================ */
+
+		/* Ensure highlight layers have a positioning context */
+		.tabs { position: relative; }
+		/* language-switch already fixed; container already relative */
+
+		/* 1) Pointer-tracking highlight vars */
+		.container,
+		.tabs,
+		.language-switch {
+			--mx: 50%;
+			--my: 10%;
+			--glow-opacity: 0;
+		}
+
+		/* 1) Radial highlight layer */
+		.container::before,
+		.tabs::before,
+		.language-switch::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			border-radius: inherit;
+			pointer-events: none;
+
+			opacity: var(--glow-opacity);
+
+			background:
+				radial-gradient(
+					280px 180px at var(--mx) var(--my),
+					rgba(255,255,255,0.55),
+					rgba(255,255,255,0.12) 35%,
+					transparent 70%
+				);
+
+			transition: opacity var(--transition-fast);
+		}
+
+		/* Dark highlight tuning */
+		body[data-theme="dark"] .container::before,
+		body[data-theme="dark"] .tabs::before,
+		body[data-theme="dark"] .language-switch::before {
+			background:
+				radial-gradient(
+					280px 180px at var(--mx) var(--my),
+					rgba(148,163,184,0.22),
+					rgba(59,130,246,0.10) 38%,
+					transparent 72%
+				);
+		}
+
+		@media (hover: hover) {
+			.container:hover,
+			.tabs:hover,
+			.language-switch:hover {
+				--glow-opacity: 1;
+			}
+		}
+
+		/* 2) Premium slow sheen using your existing container::after */
+		@media (hover: hover) {
+			.container::after {
+				background-size: 200% 100%;
+				animation: sheen-slow 6.5s ease-in-out infinite;
+			}
+		}
+
+		@keyframes sheen-slow {
+			0%, 100% { background-position: 20% 0; opacity: 0.45; }
+			50%      { background-position: 80% 0; opacity: 0.65; }
+		}
+
+		/* 3) Button loading state (for BUTTON elements) */
+		.ghost-btn,
+		.theme-toggle-btn,
+		.saved-actions button,
+		.clear-ssid-btn {
+			position: relative;
+			overflow: hidden;
+		}
+
+		.ghost-btn.is-loading,
+		.theme-toggle-btn.is-loading,
+		.saved-actions button.is-loading,
+		.clear-ssid-btn.is-loading {
+			pointer-events: none;
+			opacity: 0.92;
+			filter: saturate(0.96);
+			transform: translateY(0) !important;
+		}
+
+		.ghost-btn.is-loading::before,
+		.theme-toggle-btn.is-loading::before,
+		.saved-actions button.is-loading::before,
+		.clear-ssid-btn.is-loading::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			border-radius: inherit;
+			background:
+				linear-gradient(
+					90deg,
+					transparent,
+					rgba(59,130,246,0.10),
+					transparent
+				);
+			background-size: 200% 100%;
+			animation: loading-sheen 1.2s ease-in-out infinite;
+			opacity: 0.9;
+			pointer-events: none;
+		}
+
+		.ghost-btn.is-loading::after,
+		.theme-toggle-btn.is-loading::after,
+		.saved-actions button.is-loading::after,
+		.clear-ssid-btn.is-loading::after {
+			content: "";
+			position: absolute;
+			right: 10px;
+			top: 50%;
+			width: 14px;
+			height: 14px;
+			border-radius: 999px;
+			border: 2px solid rgba(15,23,42,0.18);
+			border-top-color: rgba(15,23,42,0.55);
+			transform: translateY(-50%);
+			animation: mini-spin 0.8s linear infinite;
+		}
+
+		body[data-theme="dark"] .ghost-btn.is-loading::after,
+		body[data-theme="dark"] .theme-toggle-btn.is-loading::after,
+		body[data-theme="dark"] .saved-actions button.is-loading::after,
+		body[data-theme="dark"] .clear-ssid-btn.is-loading::after {
+			border-color: rgba(226,232,240,0.18);
+			border-top-color: rgba(226,232,240,0.65);
+		}
+
+		@keyframes mini-spin {
+			to { transform: translateY(-50%) rotate(360deg); }
+		}
+
+		@keyframes loading-sheen {
+			0%   { background-position: 0% 0; }
+			100% { background-position: 200% 0; }
+		}
+
+		/* 3b) Submit loading state (for INPUT submit) */
+		input[type="submit"][data-loading="true"] {
+			pointer-events: none;
+			opacity: 0.95;
+			filter: saturate(0.96);
+			background-size: 220% 220%;
+			animation: submit-loading 1.1s ease-in-out infinite;
+		}
+
+		@keyframes submit-loading {
+			0%   { background-position: 0% 50%; }
+			50%  { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+
+		/* 4) Enhanced tab animation (override base fade-slide) */
+		.tab-content {
+			animation: none;
+		}
+
+		.tab-content.active {
+			animation: ios-fade-blur 0.28s cubic-bezier(.2,.8,.2,1);
+			transform-origin: top center;
+		}
+
+		@keyframes ios-fade-blur {
+			from {
+				opacity: 0;
+				transform: translateY(10px) scale(0.995);
+				filter: blur(6px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+				filter: blur(0);
+			}
+		}
+
+		/* 5) Premium list micro feedback */
+		#ap_list a,
+		#saved_list li {
+			transition:
+				transform var(--transition-fast),
+				box-shadow var(--transition-fast),
+				border-color var(--transition-fast),
+				background var(--transition-fast),
+				filter var(--transition-fast);
+		}
+
+		@media (hover: hover) {
+			#ap_list a:hover,
+			#saved_list li:hover {
+				filter: brightness(1.015);
+			}
+		}
+
+		/* 6) Low-power / reduced transparency */
+		@media (prefers-reduced-transparency: reduce) {
+			.container,
+			.tabs,
+			.language-switch,
+			input,
+			select,
+			#ap_list a,
+			#saved_list li {
+				backdrop-filter: none !important;
+				-webkit-backdrop-filter: none !important;
+			}
+		}
+
+		body[data-performance="lite"] .container,
+		body[data-performance="lite"] .tabs,
+		body[data-performance="lite"] .language-switch,
+		body[data-performance="lite"] input,
+		body[data-performance="lite"] select,
+		body[data-performance="lite"] #ap_list a,
+		body[data-performance="lite"] #saved_list li {
+			backdrop-filter: none !important;
+			-webkit-backdrop-filter: none !important;
+		}
+
+		body[data-performance="lite"] .container {
+			background: rgba(255,255,255,0.92) !important;
+		}
+
+		body[data-theme="dark"][data-performance="lite"] .container {
+			background: rgba(2,6,23,0.92) !important;
+		}
+
+		/* 7) PRO respects reduced motion */
+		@media (prefers-reduced-motion: reduce) {
+			.tab-content.active {
+				animation: none !important;
+				filter: none !important;
+			}
+			.container::before,
+			.tabs::before,
+			.language-switch::before {
+				opacity: 0 !important;
+			}
+			.container::after {
+				animation: none !important;
+			}
 		}
 
     </style>
@@ -1067,9 +1781,14 @@
                             <input type="text" id="ssid" name="ssid" required readonly>
                             <button type="button" id="clear_ssid_btn" class="clear-ssid-btn">✖</button>
                         </div>
+
+                        <!-- Hidden SSID iOS-style switch (markup aligned with CSS) -->
                         <label class="hidden-ssid-toggle">
                             <input type="checkbox" id="hidden_ssid_checkbox">
-                            <span>Sử dụng mạng ẩn (nhập SSID thủ công)</span>
+                            <span class="hidden-ssid-switch" aria-hidden="true">
+                                <span class="hidden-ssid-knob"></span>
+                            </span>
+                            <span class="hidden-ssid-text">Sử dụng mạng ẩn (nhập SSID thủ công)</span>
                         </label>
                     </p>
                     <p>
@@ -1101,129 +1820,9 @@
             <div class="tab-inner-header">
                 <div class="tab-title" data-lang="advanced_tab">Cài đặt nâng cao</div>
                 <div class="tab-subtitle">
-                    Tinh chỉnh dịch vụ MUSIC/OTA, chân SDMMC và tham số Wi-Fi radio.
+                    Tinh chỉnh dịch vụ MUSIC/OTA và tham số Wi-Fi.
                 </div>
-
-                <!-- SD MUSIC – TAG & LỆNH AI NGẮN GỌN (ĐẦY ĐỦ MCP) -->
-                <div class="feature-chips">
-                    <span class="badge-soft badge-soft-primary">SD MUSIC – phát offline từ thẻ nhớ</span>
-
-                    <!-- 1) PLAYBACK CƠ BẢN -->
-                    <span class="feature-chip">
-                        “Phát nhạc từ thẻ nhớ”
-                        → <code>self.sdmusic.playback(action="play")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Tạm dừng bài hiện tại”
-                        → <code>self.sdmusic.playback(action="pause")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Dừng phát nhạc”
-                        → <code>self.sdmusic.playback(action="stop")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Chuyển bài tiếp theo”
-                        → <code>self.sdmusic.playback(action="next")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Lùi về bài trước”
-                        → <code>self.sdmusic.playback(action="prev")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Tua đến 1 phút 30 giây”
-                        → <code>self.sdmusic.playback(action="seek", ms=90000)</code>
-                    </span>
-
-                    <!-- 2) CHẾ ĐỘ PHÁT (SHUFFLE / REPEAT) -->
-                    <span class="feature-chip">
-                        “Bật phát ngẫu nhiên”
-                        → <code>self.sdmusic.mode(action="shuffle", enabled=true)</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Tắt phát ngẫu nhiên”
-                        → <code>self.sdmusic.mode(action="shuffle", enabled=false)</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Lặp lại bài hiện tại”
-                        → <code>self.sdmusic.mode(action="repeat", mode="one")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Lặp lại toàn bộ danh sách”
-                        → <code>self.sdmusic.mode(action="repeat", mode="all")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Tắt lặp lại”
-                        → <code>self.sdmusic.mode(action="repeat", mode="none")</code>
-                    </span>
-
-                    <!-- 3) QUẢN LÝ BÀI HÁT (TRACK) -->
-                    <span class="feature-chip">
-                        “Phát bài số 10”
-                        → <code>self.sdmusic.track(action="set", index=9)</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Tên bài hiện tại”
-                        → <code>self.sdmusic.track(action="current")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Tổng số bài trong thư viện”
-                        → <code>self.sdmusic.track(action="list")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Xem thông tin bài số 3”
-                        → <code>self.sdmusic.track(action="info", index=2)</code>
-                    </span>
-
-                    <!-- 4) THƯ MỤC (DIRECTORY) -->
-                    <span class="feature-chip">
-                        “Phát thư mục &lt;tên thư mục&gt;”
-                        → <code>self.sdmusic.directory(action="play", directory="&lt;ten_thu_muc&gt;")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Liệt kê các thư mục nhạc”
-                        → <code>self.sdmusic.directory(action="list")</code>
-                    </span>
-
-                    <!-- 5) TÌM KIẾM / PHÁT THEO TÊN (SEARCH) -->
-                    <span class="feature-chip">
-                        “Tìm bài có chữ ‘love’”
-                        → <code>self.sdmusic.search(action="search", keyword="love")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Phát bài &lt;tên bài&gt; trên thẻ nhớ”
-                        → <code>self.sdmusic.search(action="play", keyword="&lt;tên bài&gt;")</code>
-                    </span>
-
-                    <!-- 6) THƯ VIỆN / PHÂN TRANG (LIBRARY) -->
-                    <span class="feature-chip">
-                        “Đếm số bài trong thư mục chill”
-                        → <code>self.sdmusic.library(action="count_dir", directory="chill")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Đếm số bài trong thư mục hiện tại”
-                        → <code>self.sdmusic.library(action="count_current")</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Xem 20 bài đầu tiên”
-                        → <code>self.sdmusic.library(action="page", page=1, page_size=20)</code>
-                    </span>
-
-                    <!-- 7) GỢI Ý BÀI HÁT (SUGGEST) -->
-                    <span class="feature-chip">
-                        “Gợi ý vài bài tiếp theo”
-                        → <code>self.sdmusic.suggest(action="next", max_results=5)</code>
-                    </span>
-                    <span class="feature-chip">
-                        “Gợi ý các bài giống ‘love’”
-                        → <code>self.sdmusic.suggest(action="similar", keyword="love", max_results=5)</code>
-                    </span>
-
-                    <!-- 8) TIẾN ĐỘ PHÁT (PROGRESS) -->
-                    <span class="feature-chip">
-                        “Tiến độ bài hát hiện tại?”
-                        → <code>self.sdmusic.progress()</code>
-                    </span>
-                </div>
+                
             </div>
             <form action="/advanced/submit" method="post" onsubmit="submitAdvancedForm(event)">
                 <p class="error" style="color: red; text-align: center;" id="advanced_error"></p>
@@ -1250,7 +1849,7 @@
 
                 <!-- SDMMC PIN CONFIG -->
                 <div class="section-group">
-                    <div class="section-label">CHÂN SDMMC</div>
+                    <div class="section-label">PIN SDMMC 1 Bit</div>
                     <h3 style="margin-top: 2px;">Chọn chân SDMMC cho thẻ nhớ</h3>
 
                     <p>
@@ -1276,7 +1875,7 @@
                 
                 <!-- Wi-Fi radio -->
                 <div class="section-group">
-                    <div class="section-label">WI-FI RADIO</div>
+                    <div class="section-label">WI-FI</div>
 
                     <p style="display: flex; align-items: center; gap: 10px;">
                         <label for="max_tx_power" data-lang="max_tx_power" style="white-space: nowrap;">Công suất phát Wi-Fi tối đa:</label>
@@ -1318,14 +1917,114 @@
     </div>
 	
     <!-- Footer / Credit -->
-    <div class="footer">
-        Bản phát triển <span class="footer-highlight">Xiaozhi AI</span> cho ESP32-S3:
-        phát nhạc đa chức năng từ thẻ nhớ, cho phép thay chân SDMMC trực tiếp trong trang cấu hình Wi-Fi.
-        <br>
-        Phát triển bởi <span class="footer-highlight">Nguyễn Thọ Chung</span>.
-    </div>
+	<div class="footer">
+		Bản phát triển <span class="footer-highlight">Xiaozhi AI</span> cho ESP32-S3 —
+		tối ưu trải nghiệm nghe nhạc từ thẻ nhớ, hỗ trợ phát nhạc đa chế độ
+		và cho phép đổi chân <b>SDMMC</b> trực tiếp ngay trên trang cấu hình Wi-Fi.
+		<br>
+
+		<span>
+			Phiên bản tính năng SD MUSIC/SDMMC:
+			<span class="footer-highlight">v1.0</span>
+			<span style="opacity:.7;">•</span>
+			Phiên bản giao diện:
+			<span class="footer-highlight" id="ui_version">2025.2</span>
+			<span style="opacity:.7;">•</span>
+			Firmware:
+			<span class="footer-highlight" id="fw_version">v1.0</span>
+		</span>
+		<br>
+
+		Phát triển bởi <span class="footer-highlight">Nguyễn Thọ Chung</span>.
+		<br>
+
+		<span>
+			Cập nhật bản mới nhất &amp; xem ghi chú phát hành tại
+			<a href="https://github.com/NTC95-Xiaozhi-Esp32" target="_blank" rel="noopener">
+				<span class="footer-highlight">NTC95-Xiaozhi-Esp32</span>
+			</a>
+		</span>
+	</div>
+
 
     <script type="text/javascript">
+        /* ============================================================
+           2025.4 PRO+ JS (INTEGRATED)
+           - Pointer-tracking glass highlight
+           - UIX.setLoading helper
+           ============================================================ */
+        (function () {
+            // Expose a tiny UI helper namespace
+            window.UIX = window.UIX || {};
+
+            window.UIX.setLoading = function (el, isLoading, text) {
+                if (!el) return;
+
+                var tag = (el.tagName || "").toLowerCase();
+
+                // Save original text/value once
+                if (!el.dataset.originalText) {
+                    el.dataset.originalText = (tag === "input")
+                        ? (el.value || "")
+                        : (el.textContent || "");
+                }
+
+                if (isLoading) {
+                    if (text) {
+                        if (tag === "input") el.value = text;
+                        else el.textContent = text;
+                    }
+
+                    if (tag === "input") {
+                        el.setAttribute("data-loading", "true");
+                    } else {
+                        el.classList.add("is-loading");
+                    }
+
+                    el.setAttribute("aria-busy", "true");
+                } else {
+                    var restore = el.dataset.originalText;
+
+                    if (typeof restore === "string") {
+                        if (tag === "input") el.value = restore;
+                        else el.textContent = restore;
+                    }
+
+                    el.removeAttribute("data-loading");
+                    el.classList.remove("is-loading");
+                    el.removeAttribute("aria-busy");
+                }
+            };
+
+            function initPointerGlass() {
+                var surfaces = document.querySelectorAll(".container, .tabs, .language-switch");
+                if (!surfaces || !surfaces.length) return;
+
+                surfaces.forEach(function (el) {
+                    el.addEventListener("pointermove", function (e) {
+                        if (e.pointerType && e.pointerType !== "mouse") return;
+
+                        var r = el.getBoundingClientRect();
+                        if (!r.width || !r.height) return;
+
+                        var x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+                        var y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
+
+                        el.style.setProperty("--mx", x + "%");
+                        el.style.setProperty("--my", y + "%");
+                        el.style.setProperty("--glow-opacity", "1");
+                    }, { passive: true });
+
+                    el.addEventListener("pointerleave", function () {
+                        el.style.setProperty("--glow-opacity", "0");
+                    }, { passive: true });
+                });
+            }
+
+            // Run after DOM ready
+            document.addEventListener("DOMContentLoaded", initPointerGlass);
+        })();
+
         // ========== Global Variables ==========
         const button = document.getElementById('button');
         const error = document.getElementById('error');
@@ -2180,6 +2879,9 @@
 
         function deleteItem(item, index) {
             item.disabled = true;
+            if (window.UIX && typeof UIX.setLoading === "function") {
+                UIX.setLoading(item, true);
+            }
             fetch('/saved/delete?index=' + index)
                 .then(response => response.json())
                 .then(() => {
@@ -2189,6 +2891,9 @@
 
         function setDefaultItem(item, index) {
             item.disabled = true;
+            if (window.UIX && typeof UIX.setLoading === "function") {
+                UIX.setLoading(item, true);
+            }
             fetch('/saved/set_default?index=' + index)
                 .then(response => response.json())
                 .then(() => {
@@ -2254,8 +2959,15 @@
 
         async function submitForm(event) {
             event.preventDefault();
-            button.disabled = true;
             error.textContent = '';
+
+            const lang = document.getElementById('language').value;
+
+            if (window.UIX && typeof UIX.setLoading === "function") {
+                UIX.setLoading(button, true, translations[lang]?.connecting || "Đang kết nối...");
+            }
+
+            button.disabled = true;
 
             const loadingOverlay = document.getElementById('loadingOverlay');
             loadingOverlay.classList.add('show');
@@ -2283,12 +2995,19 @@
                     throw new Error(data.error || 'Kết nối thất bại');
                 }
 
+                // success
+                if (window.UIX && typeof UIX.setLoading === "function") {
+                    UIX.setLoading(button, false);
+                }
                 button.disabled = false;
                 window.location.href = '/done.html';
             } catch (err) {
                 loadingOverlay.classList.remove('show');
                 error.textContent = err.message;
                 button.disabled = false;
+                if (window.UIX && typeof UIX.setLoading === "function") {
+                    UIX.setLoading(button, false);
+                }
             }
         }
 
@@ -2296,8 +3015,15 @@
             event.preventDefault();
             const advancedButton = document.getElementById('advanced_button');
             const advancedError = document.getElementById('advanced_error');
-            advancedButton.disabled = true;
             advancedError.textContent = '';
+
+            const lang = document.getElementById('language').value;
+
+            if (window.UIX && typeof UIX.setLoading === "function") {
+                UIX.setLoading(advancedButton, true, translations[lang]?.save || "Lưu...");
+            }
+
+            advancedButton.disabled = true;
 
             const config = {
                 music_url: document.getElementById('music_url').value,
@@ -2327,7 +3053,10 @@
 
                 advancedButton.disabled = false;
 
-                const lang = document.getElementById('language').value;
+                if (window.UIX && typeof UIX.setLoading === "function") {
+                    UIX.setLoading(advancedButton, false);
+                }
+
                 const msg = translations[lang] && translations[lang].config_saved
                     ? translations[lang].config_saved
                     : 'Đã lưu cấu hình';
@@ -2335,6 +3064,10 @@
             } catch (err) {
                 advancedError.textContent = err.message;
                 advancedButton.disabled = false;
+
+                if (window.UIX && typeof UIX.setLoading === "function") {
+                    UIX.setLoading(advancedButton, false);
+                }
             }
         }
 
@@ -2441,7 +3174,14 @@
 
             const refreshBtn = document.getElementById('refresh_ap_btn');
             if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => loadAPList(true));
+                refreshBtn.addEventListener('click', () => {
+                    if (window.UIX && typeof UIX.setLoading === "function") {
+                        UIX.setLoading(refreshBtn, true, "Đang quét...");
+                        // auto release after short time in case scan loop continues
+                        setTimeout(() => UIX.setLoading(refreshBtn, false), 1200);
+                    }
+                    loadAPList(true);
+                });
             }
         });
 
