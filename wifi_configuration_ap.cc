@@ -15,6 +15,7 @@
 #include <cJSON.h>
 #include <esp_smartconfig.h>
 #include "ssid_manager.h"
+#include "sd_mount.h"   // NEW: for ReinitFromNvs()
 
 #define TAG "WifiConfigurationAp"
 
@@ -218,9 +219,16 @@ void WifiConfigurationAp::StartAccessPoint()
         } else {
             sleep_mode_ = true; // 默认值
         }
-		
-		// ===== 读取 SDMMC 引脚配置 =====
+
+        // ===== 读取 SD 配置（mode + pins）=====
         int32_t v = 0;
+        if (nvs_get_i32(nvs, "sd_mode", &v) == ESP_OK) {
+            sd_mode_ = v;
+            ESP_LOGI(TAG, "SD MODE from NVS: %d", (int)sd_mode_);
+        } else {
+            sd_mode_ = 0; // 默认 1-bit
+        }
+
         if (nvs_get_i32(nvs, "sd_clk", &v) == ESP_OK) {
             sd_clk_ = v;
             ESP_LOGI(TAG, "SDMMC CLK from NVS: %d", (int)sd_clk_);
@@ -233,9 +241,34 @@ void WifiConfigurationAp::StartAccessPoint()
             sd_d0_ = v;
             ESP_LOGI(TAG, "SDMMC D0 from NVS: %d", (int)sd_d0_);
         }
+        if (nvs_get_i32(nvs, "sd_d1", &v) == ESP_OK) {
+            sd_d1_ = v;
+            ESP_LOGI(TAG, "SDMMC D1 from NVS: %d", (int)sd_d1_);
+        }
+        if (nvs_get_i32(nvs, "sd_d2", &v) == ESP_OK) {
+            sd_d2_ = v;
+            ESP_LOGI(TAG, "SDMMC D2 from NVS: %d", (int)sd_d2_);
+        }
         if (nvs_get_i32(nvs, "sd_d3", &v) == ESP_OK) {
             sd_d3_ = v;
             ESP_LOGI(TAG, "SDMMC D3 from NVS: %d", (int)sd_d3_);
+        }
+
+        if (nvs_get_i32(nvs, "spi_sck", &v) == ESP_OK) {
+            spi_sck_ = v;
+            ESP_LOGI(TAG, "SPI SCK from NVS: %d", (int)spi_sck_);
+        }
+        if (nvs_get_i32(nvs, "spi_miso", &v) == ESP_OK) {
+            spi_miso_ = v;
+            ESP_LOGI(TAG, "SPI MISO from NVS: %d", (int)spi_miso_);
+        }
+        if (nvs_get_i32(nvs, "spi_mosi", &v) == ESP_OK) {
+            spi_mosi_ = v;
+            ESP_LOGI(TAG, "SPI MOSI from NVS: %d", (int)spi_mosi_);
+        }
+        if (nvs_get_i32(nvs, "spi_cs", &v) == ESP_OK) {
+            spi_cs_ = v;
+            ESP_LOGI(TAG, "SPI CS from NVS: %d", (int)spi_cs_);
         }
 
         nvs_close(nvs);
@@ -557,13 +590,22 @@ void WifiConfigurationAp::StartWebServer()
             cJSON_AddNumberToObject(json, "max_tx_power", this_->max_tx_power_);
             cJSON_AddBoolToObject(json, "remember_bssid", this_->remember_bssid_);
             cJSON_AddBoolToObject(json, "sleep_mode", this_->sleep_mode_);
-			
-			// SDMMC Pins
-			cJSON_AddNumberToObject(json, "sd_clk", this_->sd_clk_);
-			cJSON_AddNumberToObject(json, "sd_cmd", this_->sd_cmd_);
-			cJSON_AddNumberToObject(json, "sd_d0",  this_->sd_d0_);
-			cJSON_AddNumberToObject(json, "sd_d3",  this_->sd_d3_);
-			
+
+            // SD 配置
+            cJSON_AddNumberToObject(json, "sd_mode", this_->sd_mode_);
+
+            cJSON_AddNumberToObject(json, "sd_clk", this_->sd_clk_);
+            cJSON_AddNumberToObject(json, "sd_cmd", this_->sd_cmd_);
+            cJSON_AddNumberToObject(json, "sd_d0",  this_->sd_d0_);
+            cJSON_AddNumberToObject(json, "sd_d1",  this_->sd_d1_);
+            cJSON_AddNumberToObject(json, "sd_d2",  this_->sd_d2_);
+            cJSON_AddNumberToObject(json, "sd_d3",  this_->sd_d3_);
+
+            cJSON_AddNumberToObject(json, "spi_sck",  this_->spi_sck_);
+            cJSON_AddNumberToObject(json, "spi_miso", this_->spi_miso_);
+            cJSON_AddNumberToObject(json, "spi_mosi", this_->spi_mosi_);
+            cJSON_AddNumberToObject(json, "spi_cs",   this_->spi_cs_);
+            
             // 发送JSON响应
             char *json_str = cJSON_PrintUnformatted(json);
             cJSON_Delete(json);
@@ -660,6 +702,8 @@ void WifiConfigurationAp::StartWebServer()
                 if (err != ESP_OK) {
                     ESP_LOGE(TAG, "Failed to set WiFi power: %d", err);
                     httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to set WiFi power");
+                    cJSON_Delete(json);
+                    nvs_close(nvs);
                     return ESP_FAIL;
                 }
                 err = nvs_set_i8(nvs, "max_tx_power", this_->max_tx_power_);
@@ -687,43 +731,43 @@ void WifiConfigurationAp::StartWebServer()
                     ESP_LOGE(TAG, "Failed to save sleep_mode: %d", err);
                 }
             }
-			
-			// ===== 保存 SDMMC 引脚设置 =====
-			cJSON *sd_clk = cJSON_GetObjectItem(json, "sd_clk");
-			if (cJSON_IsNumber(sd_clk)) {
-				this_->sd_clk_ = sd_clk->valueint;
-				err = nvs_set_i32(nvs, "sd_clk", this_->sd_clk_);
-				if (err != ESP_OK) {
-					ESP_LOGE(TAG, "Failed to save sd_clk: %d", err);
-				}
-			}
 
-			cJSON *sd_cmd = cJSON_GetObjectItem(json, "sd_cmd");
-			if (cJSON_IsNumber(sd_cmd)) {
-				this_->sd_cmd_ = sd_cmd->valueint;
-				err = nvs_set_i32(nvs, "sd_cmd", this_->sd_cmd_);
-				if (err != ESP_OK) {
-					ESP_LOGE(TAG, "Failed to save sd_cmd: %d", err);
-				}
-			}
+            // ===== 保存 SD 模式 =====
+            cJSON *sd_mode = cJSON_GetObjectItem(json, "sd_mode");
+            if (cJSON_IsNumber(sd_mode)) {
+                this_->sd_mode_ = sd_mode->valueint;
+                err = nvs_set_i32(nvs, "sd_mode", this_->sd_mode_);
+                if (err != ESP_OK) {
+                    ESP_LOGE(TAG, "Failed to save sd_mode: %d", err);
+                }
+            }
 
-			cJSON *sd_d0 = cJSON_GetObjectItem(json, "sd_d0");
-			if (cJSON_IsNumber(sd_d0)) {
-				this_->sd_d0_ = sd_d0->valueint;
-				err = nvs_set_i32(nvs, "sd_d0", this_->sd_d0_);
-				if (err != ESP_OK) {
-					ESP_LOGE(TAG, "Failed to save sd_d0: %d", err);
-				}
-			}
+            // ===== 保存 SDMMC / SPI 引脚（只写 JSON 中存在的 key）=====
+#define SAVE_INT32_FIELD(JSON_KEY, MEMBER, NVS_KEY)                             \
+            do {                                                                \
+                cJSON *item = cJSON_GetObjectItem(json, JSON_KEY);              \
+                if (cJSON_IsNumber(item)) {                                     \
+                    this_->MEMBER = item->valueint;                             \
+                    esp_err_t _e = nvs_set_i32(nvs, NVS_KEY, this_->MEMBER);    \
+                    if (_e != ESP_OK) {                                         \
+                        ESP_LOGE(TAG, "Failed to save %s: %d", NVS_KEY, _e);    \
+                    }                                                           \
+                }                                                               \
+            } while (0)
 
-			cJSON *sd_d3 = cJSON_GetObjectItem(json, "sd_d3");
-			if (cJSON_IsNumber(sd_d3)) {
-				this_->sd_d3_ = sd_d3->valueint;
-				err = nvs_set_i32(nvs, "sd_d3", this_->sd_d3_);
-				if (err != ESP_OK) {
-					ESP_LOGE(TAG, "Failed to save sd_d3: %d", err);
-				}
-			}
+            SAVE_INT32_FIELD("sd_clk",  sd_clk_,  "sd_clk");
+            SAVE_INT32_FIELD("sd_cmd",  sd_cmd_,  "sd_cmd");
+            SAVE_INT32_FIELD("sd_d0",   sd_d0_,   "sd_d0");
+            SAVE_INT32_FIELD("sd_d1",   sd_d1_,   "sd_d1");
+            SAVE_INT32_FIELD("sd_d2",   sd_d2_,   "sd_d2");
+            SAVE_INT32_FIELD("sd_d3",   sd_d3_,   "sd_d3");
+
+            SAVE_INT32_FIELD("spi_sck",  spi_sck_,  "spi_sck");
+            SAVE_INT32_FIELD("spi_miso", spi_miso_, "spi_miso");
+            SAVE_INT32_FIELD("spi_mosi", spi_mosi_, "spi_mosi");
+            SAVE_INT32_FIELD("spi_cs",   spi_cs_,   "spi_cs");
+
+#undef SAVE_INT32_FIELD
 
             // 提交更改
             err = nvs_commit(nvs);
@@ -734,6 +778,9 @@ void WifiConfigurationAp::StartWebServer()
                 httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to save configuration");
                 return ESP_FAIL;
             }
+
+            // 根据新的 SD 配置重新初始化 SD（只会影响 SD 驱动，不影响文件系统结构）
+            SdMount::GetInstance().ReinitFromNvs();
 
             // 发送成功响应
             httpd_resp_set_type(req, "application/json");

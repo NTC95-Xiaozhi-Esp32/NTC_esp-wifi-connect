@@ -1847,30 +1847,84 @@
                     </p>
                 </div>
 
-                <!-- SDMMC PIN CONFIG -->
+                <!-- 
+                    CẤU HÌNH BUS THẺ NHỚ
+                    - Cho phép chọn SDMMC 1-bit / SDMMC 4-bit / SPI.
+                    - Các giá trị được lưu vào NVS (namespace "wifi") qua /advanced/submit.
+                    - Chỉ những field xuất hiện trong JSON mới bị ghi, giúp tránh ghi đè ngoài phạm vi được chọn.
+                -->
                 <div class="section-group">
-                    <div class="section-label">PIN SDMMC 1 Bit</div>
-                    <h3 style="margin-top: 2px;">Chọn chân SDMMC cho thẻ nhớ</h3>
+                    <div class="section-label">THẺ NHỚ / CHẾ ĐỘ BUS</div>
+                    <h3 style="margin-top: 2px;">Chọn chế độ truy cập & chân GPIO</h3>
 
+                    <!-- Chế độ bus SD: ánh xạ với sd_mode trong firmware (0/1/2) -->
                     <p>
-                        <label for="sd_clk">SDMMC CLK (GPIO):</label>
-                        <input type="number" id="sd_clk" name="sd_clk" placeholder="ví dụ: 36">
+                        <label for="sd_mode">Chế độ truy cập thẻ SD:</label>
+                        <select id="sd_mode" name="sd_mode">
+                            <option value="0">SDMMC 1-bit (tương thích cao)</option>
+                            <option value="1">SDMMC 4-bit (tốc độ cao)</option>
+                            <option value="2">SPI (dùng chung bus SPI)</option>
+                        </select>
                     </p>
 
-                    <p>
-                        <label for="sd_cmd">SDMMC CMD (GPIO):</label>
-                        <input type="number" id="sd_cmd" name="sd_cmd" placeholder="ví dụ: 35">
-                    </p>
+                    <!-- Nhóm chân SDMMC: dùng cho cả 1-bit & 4-bit -->
+                    <div id="sdmmc_pins">
+                        <p>
+                            <label for="sd_clk">SDMMC CLK (GPIO):</label>
+                            <input type="number" id="sd_clk" name="sd_clk" placeholder="ví dụ: 17">
+                        </p>
 
-                    <p>
-                        <label for="sd_d0">SDMMC D0 (GPIO):</label>
-                        <input type="number" id="sd_d0" name="sd_d0" placeholder="ví dụ: 37">
-                    </p>
+                        <p>
+                            <label for="sd_cmd">SDMMC CMD (GPIO):</label>
+                            <input type="number" id="sd_cmd" name="sd_cmd" placeholder="ví dụ: 18">
+                        </p>
 
-                    <p>
-                        <label for="sd_d3">SDMMC D3 (Detect/NC):</label>
-                        <input type="number" id="sd_d3" name="sd_d3" placeholder="ví dụ: -1 (NC)">
-                    </p>
+                        <p>
+                            <label for="sd_d0">SDMMC D0 (GPIO):</label>
+                            <input type="number" id="sd_d0" name="sd_d0" placeholder="ví dụ: 21">
+                        </p>
+
+                        <!-- Chân chỉ dùng cho 4-bit, nhưng vẫn load/giữ giá trị để không mất config -->
+                        <div id="sdmmc_4bit_extra" style="display:none;">
+                            <p>
+                                <label for="sd_d1">SDMMC D1 (GPIO):</label>
+                                <input type="number" id="sd_d1" name="sd_d1" placeholder="ví dụ: -1 (không dùng)">
+                            </p>
+
+                            <p>
+                                <label for="sd_d2">SDMMC D2 (GPIO):</label>
+                                <input type="number" id="sd_d2" name="sd_d2" placeholder="ví dụ: -1 (không dùng)">
+                            </p>
+                        </div>
+
+                        <p>
+                            <label for="sd_d3">SDMMC D3 (Detect/NC):</label>
+                            <input type="number" id="sd_d3" name="sd_d3" placeholder="ví dụ: 13 hoặc -1 (NC)">
+                        </p>
+                    </div>
+
+                    <!-- Nhóm chân SPI: chỉ dùng khi sd_mode = 2 -->
+                    <div id="spi_pins" style="display:none;">
+                        <p>
+                            <label for="spi_sck">SPI SCK (GPIO):</label>
+                            <input type="number" id="spi_sck" name="spi_sck" placeholder="ví dụ: 36">
+                        </p>
+
+                        <p>
+                            <label for="spi_miso">SPI MISO (GPIO):</label>
+                            <input type="number" id="spi_miso" name="spi_miso" placeholder="ví dụ: 37">
+                        </p>
+
+                        <p>
+                            <label for="spi_mosi">SPI MOSI (GPIO):</label>
+                            <input type="number" id="spi_mosi" name="spi_mosi" placeholder="ví dụ: 35">
+                        </p>
+
+                        <p>
+                            <label for="spi_cs">SPI CS (GPIO):</label>
+                            <input type="number" id="spi_cs" name="spi_cs" placeholder="ví dụ: 34">
+                        </p>
+                    </div>
                 </div>
                 
                 <!-- Wi-Fi radio -->
@@ -3011,6 +3065,11 @@
             }
         }
 
+        /*
+         * Gửi cấu hình nâng cao (MUSIC/OTA/Wi-Fi + bus thẻ SD) xuống /advanced/submit.
+         * Chỉ những field xuất hiện trong object config mới được backend ghi vào NVS,
+         * nên ở đây ta chủ động chọn field theo đúng chế độ bus mà người dùng đang chọn.
+         */
         async function submitAdvancedForm(event) {
             event.preventDefault();
             const advancedButton = document.getElementById('advanced_button');
@@ -3025,17 +3084,61 @@
 
             advancedButton.disabled = true;
 
+            // Cấu hình chung (luôn được xem là "mục người dùng chọn" trong tab nâng cao)
             const config = {
                 music_url: document.getElementById('music_url').value,
                 ota_url: document.getElementById('ota_url').value,
-                max_tx_power: parseInt(document.getElementById('max_tx_power').value),
+                max_tx_power: parseInt(document.getElementById('max_tx_power').value, 10),
                 remember_bssid: document.getElementById('remember_bssid').checked,
-                sleep_mode: document.getElementById('sleep_mode').checked,
-                sd_clk: parseInt(document.getElementById('sd_clk').value),
-                sd_cmd: parseInt(document.getElementById('sd_cmd').value),
-                sd_d0: parseInt(document.getElementById('sd_d0').value),
-                sd_d3: parseInt(document.getElementById('sd_d3').value)
+                sleep_mode: document.getElementById('sleep_mode').checked
             };
+
+            // Helper: chỉ thêm field số khi người dùng có nhập và giá trị hợp lệ,
+            // tránh gửi NaN xuống backend (NVS).
+            function addIntIfValid(inputId, key) {
+                const el = document.getElementById(inputId);
+                if (!el) return;
+                const raw = (el.value || '').trim();
+                if (raw === '') return;
+                const v = parseInt(raw, 10);
+                if (!Number.isNaN(v)) {
+                    config[key] = v;
+                }
+            }
+
+            // Lấy chế độ bus hiện tại (0: 1-bit, 1: 4-bit, 2: SPI)
+            const sdModeEl = document.getElementById('sd_mode');
+            let sdMode = 0;
+            if (sdModeEl) {
+                sdMode = parseInt(sdModeEl.value, 10);
+                if (!Number.isNaN(sdMode)) {
+                    config.sd_mode = sdMode;
+                }
+            }
+
+            // Theo chế độ bus, chỉ gửi các chân liên quan để đúng yêu cầu
+            // "chỉ ghi và sửa những mục (entries) mà người dùng chọn".
+            if (sdMode === 0) {
+                // SDMMC 1-bit → CLK, CMD, D0, D3 (detect/NC)
+                addIntIfValid('sd_clk', 'sd_clk');
+                addIntIfValid('sd_cmd', 'sd_cmd');
+                addIntIfValid('sd_d0',  'sd_d0');
+                addIntIfValid('sd_d3',  'sd_d3');
+            } else if (sdMode === 1) {
+                // SDMMC 4-bit → CLK, CMD, D0..D3
+                addIntIfValid('sd_clk', 'sd_clk');
+                addIntIfValid('sd_cmd', 'sd_cmd');
+                addIntIfValid('sd_d0',  'sd_d0');
+                addIntIfValid('sd_d1',  'sd_d1');
+                addIntIfValid('sd_d2',  'sd_d2');
+                addIntIfValid('sd_d3',  'sd_d3');
+            } else if (sdMode === 2) {
+                // SPI → SCK, MISO, MOSI, CS
+                addIntIfValid('spi_sck',  'spi_sck');
+                addIntIfValid('spi_miso', 'spi_miso');
+                addIntIfValid('spi_mosi', 'spi_mosi');
+                addIntIfValid('spi_cs',   'spi_cs');
+            }
 
             try {
                 const response = await fetch('/advanced/submit', {
@@ -3093,18 +3196,23 @@
             }, 3000);
         }
 
+        /*
+         * Load cấu hình nâng cao từ /advanced/config và đổ vào form.
+         * Backend đã trả sd_mode + đủ chân SDMMC/SPI, nên ta bind hết,
+         * sau đó gọi updateSdModeUi() để hiển thị đúng nhóm chân theo mode.
+         */
         async function loadAdvancedConfig() {
             try {
                 const response = await fetch('/advanced/config');
                 const data = await response.json();
                 
-                if (data.music_url) {
+                if (data.music_url !== undefined) {
                     document.getElementById('music_url').value = data.music_url;
                 }
-                if (data.ota_url) {
+                if (data.ota_url !== undefined) {
                     document.getElementById('ota_url').value = data.ota_url;
                 }
-                if (data.max_tx_power) {
+                if (data.max_tx_power !== undefined) {
                     document.getElementById('max_tx_power').value = data.max_tx_power;
                 }
                 if (data.remember_bssid !== undefined) {
@@ -3113,13 +3221,65 @@
                 if (data.sleep_mode !== undefined) {
                     document.getElementById('sleep_mode').checked = data.sleep_mode;
                 }
+
+                // sd_mode: nếu không có trong NVS thì mặc định 0 (1-bit)
+                const sdModeEl = document.getElementById('sd_mode');
+                if (sdModeEl) {
+                    if (data.sd_mode !== undefined) {
+                        sdModeEl.value = String(data.sd_mode);
+                    } else {
+                        sdModeEl.value = "0";
+                    }
+                }
                 
+                // SDMMC pins
                 if (data.sd_clk !== undefined) document.getElementById('sd_clk').value = data.sd_clk;
                 if (data.sd_cmd !== undefined) document.getElementById('sd_cmd').value = data.sd_cmd;
-                if (data.sd_d0 !== undefined) document.getElementById('sd_d0').value = data.sd_d0;
-                if (data.sd_d3 !== undefined) document.getElementById('sd_d3').value = data.sd_d3;
+                if (data.sd_d0  !== undefined) document.getElementById('sd_d0').value  = data.sd_d0;
+                if (data.sd_d1  !== undefined) document.getElementById('sd_d1').value  = data.sd_d1;
+                if (data.sd_d2  !== undefined) document.getElementById('sd_d2').value  = data.sd_d2;
+                if (data.sd_d3  !== undefined) document.getElementById('sd_d3').value  = data.sd_d3;
+
+                // SPI pins
+                if (data.spi_sck  !== undefined) document.getElementById('spi_sck').value  = data.spi_sck;
+                if (data.spi_miso !== undefined) document.getElementById('spi_miso').value = data.spi_miso;
+                if (data.spi_mosi !== undefined) document.getElementById('spi_mosi').value = data.spi_mosi;
+                if (data.spi_cs   !== undefined) document.getElementById('spi_cs').value   = data.spi_cs;
+
+                // Cập nhật UI hiển thị nhóm chân theo mode hiện tại
+                updateSdModeUi();
             } catch (error) {
                 console.error('Error loading advanced config:', error);
+            }
+        }
+
+        /*
+         * Hiển thị/ẩn các nhóm chân theo sd_mode:
+         * - 0: SDMMC 1-bit → hiển thị sdmmc_pins, ẩn D1/D2, ẩn SPI.
+         * - 1: SDMMC 4-bit → hiển thị sdmmc_pins + D1/D2, ẩn SPI.
+         * - 2: SPI         → hiển thị spi_pins, ẩn toàn bộ SDMMC pins.
+         */
+        function updateSdModeUi() {
+            const sdModeEl = document.getElementById('sd_mode');
+            if (!sdModeEl) return;
+
+            const mode = parseInt(sdModeEl.value, 10);
+
+            const sdmmcPins   = document.getElementById('sdmmc_pins');
+            const sdmmc4Extra = document.getElementById('sdmmc_4bit_extra');
+            const spiPins     = document.getElementById('spi_pins');
+
+            // Mode 0 / 1 dùng SDMMC
+            if (sdmmcPins) {
+                sdmmcPins.style.display = (mode === 0 || mode === 1) ? 'block' : 'none';
+            }
+            // D1/D2 chỉ dùng cho 4-bit
+            if (sdmmc4Extra) {
+                sdmmc4Extra.style.display = (mode === 1) ? 'block' : 'none';
+            }
+            // Mode 2 dùng SPI
+            if (spiPins) {
+                spiPins.style.display = (mode === 2) ? 'block' : 'none';
             }
         }
 
@@ -3165,6 +3325,12 @@
                     localStorage.setItem('last_ssid', ssid.value);
                 }
             });
+
+            // Lắng nghe thay đổi chế độ bus SD để cập nhật nhóm chân hiển thị
+            const sdModeEl = document.getElementById('sd_mode');
+            if (sdModeEl) {
+                sdModeEl.addEventListener('change', updateSdModeUi);
+            }
 
             initPasswordToggle();
             initHiddenSsidToggle();

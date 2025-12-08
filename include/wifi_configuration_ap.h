@@ -27,12 +27,10 @@ public:
     std::string GetSsid();
     std::string GetWebServerUrl();
 
-    // Delete copy constructor and assignment operator
     WifiConfigurationAp(const WifiConfigurationAp&) = delete;
     WifiConfigurationAp& operator=(const WifiConfigurationAp&) = delete;
 
 private:
-    // Private constructor
     WifiConfigurationAp();
     ~WifiConfigurationAp();
 
@@ -49,27 +47,45 @@ private:
     esp_netif_t* ap_netif_ = nullptr;
     std::vector<wifi_ap_record_t> ap_records_;
 
-    // 高级配置项
+    // ===== 高级配置项 =====
     std::string music_url_;
     std::string ota_url_;
     int8_t max_tx_power_;
     bool remember_bssid_;
     bool sleep_mode_;
-	
-	// ===== NEW: SDMMC Pin Configuration =====
+
+    // =====================================================
+    // SD Bus Mode:
+    // 0 = SDMMC 1-bit
+    // 1 = SDMMC 4-bit
+    // 2 = SPI
+    // =====================================================
+    int32_t sd_mode_ = 0;
+
+    // ===== SDMMC PINS =====
     int32_t sd_clk_ = -1;
     int32_t sd_cmd_ = -1;
     int32_t sd_d0_  = -1;
     int32_t sd_d3_  = -1;
 
+    // ===== 4-bit extra pins =====
+    int32_t sd_d1_ = -1;
+    int32_t sd_d2_ = -1;
+
+    // ===== SPI PINS =====
+    int32_t spi_sck_  = -1;
+    int32_t spi_miso_ = -1;
+    int32_t spi_mosi_ = -1;
+    int32_t spi_cs_   = -1;
+
     void StartAccessPoint();
     void StartWebServer();
 
-    // Event handlers
     static void WifiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
     static void IpEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
-    static void SmartConfigEventHandler(void* arg, esp_event_base_t event_base, 
+    static void SmartConfigEventHandler(void* arg, esp_event_base_t event_base,
                                       int32_t event_id, void* event_data);
+
     esp_event_handler_instance_t sc_event_instance_ = nullptr;
 };
 
