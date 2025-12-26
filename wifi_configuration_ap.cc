@@ -519,6 +519,7 @@ void WifiConfigurationAp::StartWebServer()
             cJSON_AddBoolToObject(json, "remember_bssid", this_->remember_bssid_);
             cJSON_AddBoolToObject(json, "sleep_mode", this_->sleep_mode_);
 
+<<<<<<< HEAD
 			// 读取并回传SD卡总线配置（存储在同一NVS namespace: "wifi"）
 			{
 				nvs_handle_t nvs;
@@ -543,6 +544,8 @@ void WifiConfigurationAp::StartWebServer()
 			}
 
 
+=======
+>>>>>>> 4aa50981d4fd8b0371e7901244ec677c318688a2
             // 发送JSON响应
             char *json_str = cJSON_PrintUnformatted(json);
             cJSON_Delete(json);
@@ -657,6 +660,7 @@ void WifiConfigurationAp::StartWebServer()
                 }
             }
 
+<<<<<<< HEAD
 			// 保存SD卡配置（sd_mode + SDMMC/SPI pins）
 			auto set_i32_if_present = [&](const char* json_key, const char* nvs_key, int32_t min_v, int32_t max_v) {
 				cJSON *it = cJSON_GetObjectItemCaseSensitive(json, json_key);
@@ -686,6 +690,8 @@ void WifiConfigurationAp::StartWebServer()
 			set_i32_if_present("spi_mosi", "spi_mosi", -1, 48);
 			set_i32_if_present("spi_cs",   "spi_cs",   -1, 48);
 
+=======
+>>>>>>> 4aa50981d4fd8b0371e7901244ec677c318688a2
             // 提交更改
             err = nvs_commit(nvs);
             nvs_close(nvs);
