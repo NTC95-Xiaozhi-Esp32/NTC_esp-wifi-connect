@@ -1,6 +1,7 @@
 #include "wifi_configuration_ap.h"
 #include <cstdio>
 #include <memory>
+#include <cstring>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 #include <esp_err.h>
@@ -543,6 +544,26 @@ void WifiConfigurationAp::StartWebServer()
 			}
 
 
+            // 读取并回传天气配置（NVS namespace: "weather"）
+            {
+                nvs_handle_t nvs_w;
+                if (nvs_open("weather", NVS_READONLY, &nvs_w) == ESP_OK) {
+                    char api_key[96] = {0};
+                    size_t api_key_size = sizeof(api_key);
+                    if (nvs_get_str(nvs_w, "api_key", api_key, &api_key_size) == ESP_OK) {
+                        cJSON_AddStringToObject(json, "weather_api_key", api_key);
+                    }
+
+                    char city[96] = {0};
+                    size_t city_size = sizeof(city);
+                    if (nvs_get_str(nvs_w, "city", city, &city_size) == ESP_OK) {
+                        cJSON_AddStringToObject(json, "weather_city", city);
+                    }
+
+                    nvs_close(nvs_w);
+                }
+            }
+
             // 发送JSON响应
             char *json_str = cJSON_PrintUnformatted(json);
             cJSON_Delete(json);
@@ -685,6 +706,49 @@ void WifiConfigurationAp::StartWebServer()
 			set_i32_if_present("spi_miso", "spi_miso", -1, 48);
 			set_i32_if_present("spi_mosi", "spi_mosi", -1, 48);
 			set_i32_if_present("spi_cs",   "spi_cs",   -1, 48);
+
+            // Save weather settings (NVS namespace: "weather")
+            {
+                nvs_handle_t nvs_w;
+                esp_err_t err_w = nvs_open("weather", NVS_READWRITE, &nvs_w);
+                if (err_w == ESP_OK) {
+                    // API key
+                    cJSON *api_key = cJSON_GetObjectItemCaseSensitive(json, "weather_api_key");
+                    if (cJSON_IsString(api_key) && api_key->valuestring) {
+                        const char* v = api_key->valuestring;
+                        if (strlen(v) == 0) {
+                            nvs_erase_key(nvs_w, "api_key");
+                        } else {
+                            esp_err_t e2 = nvs_set_str(nvs_w, "api_key", v);
+                            if (e2 != ESP_OK) {
+                                ESP_LOGE(TAG, "Failed to save weather api_key: %s", esp_err_to_name(e2));
+                            }
+                        }
+                    }
+
+                    // City override
+                    cJSON *city = cJSON_GetObjectItemCaseSensitive(json, "weather_city");
+                    if (cJSON_IsString(city) && city->valuestring) {
+                        const char* v = city->valuestring;
+                        if (strlen(v) == 0) {
+                            nvs_erase_key(nvs_w, "city");
+                        } else {
+                            esp_err_t e2 = nvs_set_str(nvs_w, "city", v);
+                            if (e2 != ESP_OK) {
+                                ESP_LOGE(TAG, "Failed to save weather city: %s", esp_err_to_name(e2));
+                            }
+                        }
+                    }
+
+                    err_w = nvs_commit(nvs_w);
+                    nvs_close(nvs_w);
+                    if (err_w != ESP_OK) {
+                        ESP_LOGE(TAG, "Failed to commit weather settings: %s", esp_err_to_name(err_w));
+                    }
+                } else {
+                    ESP_LOGE(TAG, "Failed to open NVS namespace \"weather\": %s", esp_err_to_name(err_w));
+                }
+            }
 
             // 提交更改
             err = nvs_commit(nvs);

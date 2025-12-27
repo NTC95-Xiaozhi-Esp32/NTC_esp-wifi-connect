@@ -1847,6 +1847,28 @@
                     </p>
                 </div>
 
+                <!-- Weather settings -->
+                <div class="section-group">
+                    <div class="section-label">THỜI TIẾT</div>
+                    <p>
+                        <label for="weather_api_key">OPENWEATHER_API_KEY:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" id="weather_api_key" name="weather_api_key" style="flex: 1;" placeholder="Nhập API key (bắt buộc)">
+                            <button type="button" onclick="document.getElementById('weather_api_key').value=''" class="ghost-btn" style="padding-inline:10px;">❌</button>
+                        </div>
+                    </p>
+                    <p>
+                        <label for="weather_city">Tên thành phố (tùy chọn):</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" id="weather_city" name="weather_city" style="flex: 1;" placeholder="Ví dụ: Tokyo">
+                            <button type="button" onclick="document.getElementById('weather_city').value=''" class="ghost-btn" style="padding-inline:10px;">❌</button>
+                        </div>
+                    </p>
+                    <p style="margin-top:-6px; opacity:.75; font-size:.95em;">
+                        Nếu để trống <b>Tên thành phố</b>, firmware sẽ tự lấy vị trí theo IP (ipwhois) để truy vấn thời tiết.
+                    </p>
+                </div>
+
                 <!-- 
                     CẤU HÌNH BUS THẺ NHỚ
                     - Cho phép chọn SDMMC 1-bit / SDMMC 4-bit / SPI.
@@ -3090,7 +3112,9 @@
                 ota_url: document.getElementById('ota_url').value,
                 max_tx_power: parseInt(document.getElementById('max_tx_power').value, 10),
                 remember_bssid: document.getElementById('remember_bssid').checked,
-                sleep_mode: document.getElementById('sleep_mode').checked
+                sleep_mode: document.getElementById('sleep_mode').checked,
+                weather_api_key: (document.getElementById('weather_api_key').value || '').trim(),
+                weather_city: (document.getElementById('weather_city').value || '').trim()
             };
 
             // Helper: chỉ thêm field số khi người dùng có nhập và giá trị hợp lệ,
@@ -3220,6 +3244,12 @@
                 }
                 if (data.sleep_mode !== undefined) {
                     document.getElementById('sleep_mode').checked = data.sleep_mode;
+                }
+                if (data.weather_api_key !== undefined) {
+                    document.getElementById('weather_api_key').value = data.weather_api_key;
+                }
+                if (data.weather_city !== undefined) {
+                    document.getElementById('weather_city').value = data.weather_city;
                 }
 
                 // sd_mode: nếu không có trong NVS thì mặc định 0 (1-bit)
